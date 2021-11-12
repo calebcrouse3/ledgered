@@ -2,4 +2,11 @@
 
 {% block content %}
 <p>Here you will upload files to be fed into the data base.</p>
+
+<form action="{% url 'ledgered_app:upload' %}" method='post', enctype=multipart/form-data>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button name="submit">Submit Upload</button>
+  </form>
+
 {% endblock content %}

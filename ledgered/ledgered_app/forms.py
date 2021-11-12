@@ -1,20 +1,30 @@
 from django import forms
+from .models import FileUpload, Entry
 
 
-# define plugin types
-AMAZON = "A"
-MINT = "M"
+class FileUploadForm(forms.ModelForm):
+    class Meta:
+        model = FileUpload
+        fields = ['account_type', 'file']
+        labels = {
+            'account_type': 'Account Type',
+            'file': 'File',
+        }
 
-PLUGINS = [
-    (AMAZON, "Amazon"),
-    (MINT, "Mint"),
-]
 
-class FileUpload():
-    """An external file upload"""
-    account_type = forms.CharField(
-        max_length=2,
-        choices=PLUGINS,
-        default=MINT,
-    )
-    file = forms.FileField()
+class EntryForm(forms.ModelForm):
+    class Meta:
+        model = Entry
+        fields = [
+            'date',
+            'entry_type',
+            'amount',
+            'account',
+            'original_description',
+            'pretty_description',
+            'category',
+            'subcategory',    
+        ]
+        labels = {
+            'date': 'Date'
+        }

@@ -11,4 +11,5 @@ urlpatterns = [
     path('ledger', views.ledger, name='ledger'),
     path('reports', views.reports, name='reports'),
     path('manage', views.manage, name='manage'),
+    path('upload_success', views.upload_success, name='upload_success'),
 ]

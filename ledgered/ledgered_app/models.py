@@ -32,3 +32,20 @@ class Description(models.Model):
     description = models.CharField(max_length=200)
     phrase_match = models.CharField(max_length=200)
 
+
+# define plugin types
+AMAZON = "A"
+MINT = "M"
+
+PLUGINS = [
+    (AMAZON, "Amazon"),
+    (MINT, "Mint"),
+]
+
+class FileUpload(models.Model):
+    account_type = models.CharField(
+        max_length=2,
+        choices=PLUGINS,
+        default=MINT,
+    )
+    file = models.FileField()
