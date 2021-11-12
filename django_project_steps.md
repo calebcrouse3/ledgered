@@ -70,11 +70,10 @@ urlpatterns = [
     path('', include('song_tracker_app.urls')),
 ]
 ```
+
 create `urls.py` in song_tracker_app and add home page url pattern \
 
-
 create new function in `setlist_tracker_app/views.py` to map url patterns to functions and templates \
-
 
 create new folder to hold templates \
 `mkdir setlist_tracker/setlist_tracker_app/templates/setlist_tracker_app` (is a little weird but thats the best structure to not confuse django) \
@@ -86,7 +85,7 @@ create more hmtl files to view data on different pages
 
 now we need to provide ways for user to enter their own data using forms
 
-create new folder `setlist_tracker_app/forms.py`
+create new file `setlist_tracker_app/forms.py`
 
 user djangos `forms.ModelForm` to automatically create forms from your defined models
 
