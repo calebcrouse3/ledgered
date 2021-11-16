@@ -1,5 +1,11 @@
 {% extends "ledgered_app/base.html" %}
 
 {% block content %}
-<p>Success! We uploaded {{new_entry_num}} new transaction entries and added their contents to our database.</p>
+<p>
+    File processed successfully!<br>
+    {{new}} new transaction added.<br>
+    {{updated}} updated transaction.<br>
+    {{duplicate}} duplicate transaction ignored.<br>
+    {{error}} errors encountered.
+</p>
 {% endblock content %}

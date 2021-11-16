@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+
+from .seeding.populate import CategorySeeder
 from .upload_handler import handle_upload
 from .forms import FileUploadForm
 
@@ -16,8 +18,13 @@ def upload(request):
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
             file_upload = form.save(commit=False)
-            new_entry_num=handle_upload(request.FILES['file'], file_upload.account_type)
-            return redirect(f'upload_success/{str(new_entry_num)}')
+            upload_summary=handle_upload(request.FILES['file'], file_upload.account_type)
+            return redirect(
+                f'ledgered_app:upload_success', 
+                new=upload_summary["new"], 
+                updated=upload_summary["updated"], 
+                duplicate=upload_summary["duplicate"], 
+                error=upload_summary["error"])
     else:
         form = FileUploadForm()
 
@@ -25,9 +32,15 @@ def upload(request):
     return render(request, 'ledgered_app/upload.html', context)
 
 
-def upload_success(request, new_entry_num):
+def upload_success(request, new, updated, duplicate, error):
     """Successful Upload"""
-    return render(request, 'ledgered_app/upload_success.html', context={"new_entry_num": new_entry_num})
+    context = {
+        "new": new,
+        "updated": updated,
+        "duplicate": duplicate,
+        "error": error
+    }
+    return render(request, 'ledgered_app/upload_success.html', context=context)
 
 
 def ledger(request):
@@ -43,3 +56,9 @@ def reports(request):
 def manage(request):
     """Page to manage user data."""
     return render(request, 'ledgered_app/manage.html')
+
+
+def seeder(request):
+    cat_seeder = CategorySeeder()
+    cat_seeder.seed()
+    return render(request, 'ledgered_app/seeder.html')

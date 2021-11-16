@@ -1,5 +1,3 @@
-from numpy import deprecate
-from numpy.lib.function_base import delete
 from ..forms import EntryForm
 from ..models import Entry
 from .plugin import Plugin
@@ -7,14 +5,19 @@ from datetime import datetime
 import pandas as pd
 import logging
 
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# TODO need to add logic to determine if transaction are new one or not
+# TODO verify that we actually need to aggregate transactions at all?
 
-class MintPlugin(): # make this a child class later (Plugin)
+class MintPlugin(Plugin):
+
     def __init__(self):
-        self.INPUT_SCHEMA = [
+        super().__init__()
+
+
+    def get_input_schema(self):
+        """Define expected input schema for this plugin csv."""
+        return [
             "date",
             "description",
             "original_description",
@@ -26,171 +29,124 @@ class MintPlugin(): # make this a child class later (Plugin)
             "notes",
         ]
 
-        # defines the columns on which entries will have amounts summed across
-        self.ENTRY_ROLLUP_KEYS = [
-            "date",
-            "account",
-            "entry_type",
-            "original_description",
-        ]
 
-    def snake_string(self, s):
-        return s.replace(" ", "_").lower()
-
-    def verify_headers(self, headers):
-        if len(headers) != len(self.INPUT_SCHEMA):
-            return False
-
-        for i in range(len(headers)):
-            if self.snake_string(headers[i]) != self.INPUT_SCHEMA[i]:
-                return False
-
-        return True
-
-    def get_matching_keyed_entries(self, entry):
-        """Returns true if entry does not exist in the database"""
+    def get_matching_entry(self, form):
+        """Returns matching entry if it exists and handles unexpected behaviors."""
         e = (
             Entry.objects
-            .filter(date = entry.date)
-            .filter(account = entry.account)
-            .filter(entry_type = entry.entry_type)
-            .filter(original_description = entry.original_description)
+            .filter(date = form.data["date"])
+            .filter(account = form.data["account"])
+            .filter(entry_type = form.data["entry_type"])
+            .filter(original_description = form.data["original_description"])
         )
-        return e
+
+        if len(e) > 0:
+
+            if len(e) > 1:
+                print("ERROR - number of matching entries is greater than 1")
+
+            return e[0]
+
+        else:
+            return None
 
 
-    @deprecate
+
+    def create_form_data(self, row):
+        """Create a data dict from rollup df to pass into a form."""
+        return {
+            "date": datetime.strptime(row["date"], "%m/%d/%Y").date(),
+            "entry_type": row["entry_type"],
+            "amount": float(row["amount"]),
+            "account": "Mint",
+            "original_description": row["original_description"],
+            "pretty_description": None,
+            "category": None,
+            "subcategory": None,
+        }
+
+
+    def handle_new_entry(self, form):
+        """Save a new entry."""
+        if form.is_valid():
+            form.save()
+            print("SUCCESS: entry submitted")
+            return "new"
+
+        else:
+            print("ERROR new entry form not valid")
+            print(form.errors)
+            return "error"
+
+
+    def handle_matching_entry(self, form, matching_entry):
+        """Determine what to do with a entry with an existing match in the db."""
+        if form.data["amount"] > matching_entry.amount:
+            print("SUCCESS: existing entry amount overwritten")
+            Entry.objects.filter(id=matching_entry.id).update(amount=form.data["amount"])
+            return "updated"
+
+        else:
+            print("INFO: duplicate entry ignored")
+            return "duplicate"
+
+    
+    def new_entry_handler(self, row):
+        """Takes a row from the rollup df and determines what to do with it."""
+
+        form = EntryForm(self.create_form_data(row))
+        # if everything is working, there should only be one matching entry
+        matching_entry = self.get_matching_entry(form)
+
+        if matching_entry:
+            result = self.handle_matching_entry(form, matching_entry)
+
+        elif not matching_entry:
+            result = self.handle_new_entry(form)
+
+        else:
+            result = "error"
+
+        return result
+
+
+    def rollup_file_data(self, lines):
+        """Take parsed lines and rollup into df."""
+        entries_df = pd.DataFrame(lines, columns=self.INPUT_SCHEMA)
+        entries_df.rename(columns={"transaction_type":"entry_type"}, inplace=True)
+        entries_df["amount"] = entries_df["amount"].astype(float)
+        rollup_df = entries_df.groupby(self.ROLLUP_KEYS, as_index=False).sum("amount")
+        return rollup_df
+
+
     def process(self, file):
-        """Process new file and handle submission of entries to DB"""
-        #with open('some/file/name.txt', 'wb+') as destination:
+        """Process file data into the data base"""
 
-        def process_line(line):
-            return [x.replace('"', "") for x in line.split(",")]
-
-        new_entry_count = 0
-        if file.size < 10e5:
-            file_data = file.read().decode("utf-8")
-            lines = file_data.split("\n")
-            headers = [self.snake_string(colname) for colname in process_line(lines[0])]
-
-            if self.verify_headers(headers):
-                for line in lines[1:]:
-
-                    print(line)
-
-                    values = process_line(line)
-                    named_values = dict(zip(headers, values))
-
-                    form = EntryForm()
-                    entry = form.save(commit=False)
-
-                    entry.date = str(datetime.strptime(named_values["Date"], "%m/%d/%Y"))
-                    entry.entry_type = named_values["Transaction Type"]
-                    entry.amount = float(named_values["Amount"])
-                    entry.account = "Chase"
-                    entry.original_description = named_values["Original Description"]
-                    entry.pretty_description = None
-                    entry.category = None
-                    entry.subcategory = None
-
-                    # make rows unique by adding an incrementor for similar entrys
-                    # similar as in same date, account, amount, desc
-                    entry.entry_key_idx_num = self.num_similar_entries(entry)
-
-                    if form.is_valid():
-                        
-                        if True: # self.new_entry(entry):
-                            entry.save()
-                            print("SUCCESS: entry submitted")
-                            new_entry_count += 1
-     
-
-                    else:
-                        print("ERROR: form invalid")
-                        print(form.errors)
-                    
-            else:
-                print("ERROR: headers dont match")
-                print(f"Headers: {headers}")
-                print(f"Input Schema: {self.INPUT_SCHEMA}")
-
-        else:
-            print("ERROR: file too large")
-
-        return new_entry_count
-
-
-
-
-
-
-    def process_pandas(self, file):
-
-        def process_line(line):
-            return [x.replace('"', "") for x in line.split(",")]
-
-        new_entry_count = 0
+        file_upload_result_summary = {
+            "new": 0,
+            "updated": 0,
+            "duplicate": 0,
+            "error": 0
+        }
 
         if file.size < 10e5:
             file_data = file.read().decode("utf-8")
             lines = file_data.split("\n")
-            headers = [self.snake_string(colname) for colname in process_line(lines[0])]
+            headers = [self.snake_string(colname) for colname in self.process_line(lines[0])]
 
             if self.verify_headers(headers):
-                # process each line after the header line by parsing them into lists
-                processed_lines = [process_line(line) for line in lines[1:]]
+                # parse csv text as 2d list to pass to data frames
+                processed_lines = [self.process_line(line) for line in lines[1:]]
+                rollup_df = self.rollup_file_data(processed_lines)
 
-                # if summed amount for the rollup group is larger than amount in matching entry in DB, replace with that larger amount
-                # this might create some edge cases where uploading two files with mutually exlusive time windows dont produce the correct results for 
-                # duplicate entries on the same day
-
-                entries_df = pd.DataFrame(processed_lines, columns=headers)
-
-                entries_df.rename(columns={"transaction_type":"entry_type"}, inplace=True)
-
-                grouped_entries_df = entries_df.groupby(self.ENTRY_ROLLUP_KEYS).sum("amount")
-
-                for row in grouped_entries_df.iterrows():
-                    # TODO for each row, if the rollup key is not in the db, add the whole entry, 
-                    # if it is in the DB but the amount is smaller, update the amount with the larger amount
-                    # if it is and the amount is the same, ignore that entry, its considered a duplicate
-
-                    form = EntryForm()
-                    entry = form.save(commit=False)
-
-                    entry.date = str(datetime.strptime(row["date"], "%m/%d/%Y"))
-                    entry.entry_type = row["entry_type"]
-                    entry.amount = float(row["amount"])
-                    entry.account = "Mint"
-                    entry.original_description = row["original_description"]
-                    entry.pretty_description = None
-                    entry.category = None
-                    entry.subcategory = None
-
-                    matching_entries = self.get_matching_keyed_entries(entry)
-
-                    if len(matching_entries) == 0:
-                        if form.is_valid():
-                            entry.save()
-                            print("SUCCESS: entry submitted")
-                            new_entry_count += 1
-                        
-
-                    elif len(matching_entries) > 0:
-                        # grab first matching entry in case there are multiple
-                        matching_entry = matching_entries[0]
-
-                        if entry.amount > matching_entry.amount:
-                            pass
-                            # TODO update existing entry with larger amount
-                        
-
-                    elif len(matching_entries > 1):
-                        logger.error("ERROR -  number of matching entries is greater than 1")
-
+                for _, row in rollup_df.iterrows():
+                    entry_results = self.new_entry_handler(row)
+                    file_upload_result_summary[entry_results] += 1
 
             else:
-                logger.error("ERROR Headers for uploaded file csv do match match plugin schema.")
+                print("ERROR - Headers for uploaded file csv do match match plugin schema.")
 
         else:
-            logger.error("ERROR Uploaded file too large.")
+            print("ERROR - Uploaded file too large.")
+
+        return file_upload_result_summary

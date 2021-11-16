@@ -11,5 +11,6 @@ urlpatterns = [
     path('ledger', views.ledger, name='ledger'),
     path('reports', views.reports, name='reports'),
     path('manage', views.manage, name='manage'),
-    path('upload_success/<new_entry_num>', views.upload_success, name='upload_success'),
+    path('upload_success/<int:new>/<int:updated>/<int:duplicate>/<int:error>/', views.upload_success, name='upload_success'),
+    path('seeder', views.seeder, name='seeder')
 ]

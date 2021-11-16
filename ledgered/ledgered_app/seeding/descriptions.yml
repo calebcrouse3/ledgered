@@ -1,0 +1,252 @@
+ironnet:
+  is_identity: True
+
+robinhood:
+  is_identity: True
+
+home depot:
+  is_identity: True
+
+amazon:
+  is_identity: True
+
+venmo:
+  is_identity: True
+
+remote online deposit:
+  is_identity: True
+
+simple:
+  is_identity: True
+
+atm:
+  is_identity: True
+
+coinbase:
+  is_identity: True
+
+chase card:
+  is_identity: True
+
+citi:
+  is_identity: True
+
+usaa:
+  is_identity: True
+
+vhc:
+  is_identity: True
+
+parking:
+  is_identity: True
+
+5guys:
+  is_identity: True
+
+prime video:
+  is_identity: True
+
+cubesmart:
+  is_identity: True
+
+hbo:
+  is_identity: True
+
+bird app:
+  is_identity: True
+
+bund up:
+  is_identity: True
+
+total wine:
+  is_identity: True
+
+bread & water:
+  is_identity: True
+
+giant:
+  is_identity: True
+
+idego:
+  is_identity: True
+
+goat:
+  is_identity: True
+
+lim*ride:
+  is_identity: True
+
+postmates:
+  is_identity: True
+
+philz coffee:
+  is_identity: True
+
+northside:
+  is_identity: True
+
+origin coffee lab:
+  is_identity: True
+
+citicards cash reward:
+  is_identity: True
+
+7-eleven:
+  is_identity: True
+
+uber eats:
+  is_identity: True
+
+spider kellys:
+  is_identity: True
+
+camp sunshine:
+  is_identity: True
+
+sheetz:
+  is_identity: True
+
+T.J. MAXX:
+  is_identity: True
+
+CHICK-FIL-A:
+  is_identity: True
+
+BEARDED GOAT:
+  is_identity: True
+
+exxon:
+  is_identity: True
+
+Cvs:
+  is_identity: True
+
+ATHLETICGREENS:
+  is_identity: True
+
+GOLDS GYM:
+  is_identity: True
+
+APPLE.COM/BILL:
+  is_identity: True
+
+BP:
+  is_identity: True
+
+DICKS SPORTING:
+  is_identity: True
+
+CORE PHYSICAL THERAPY:
+  is_identity: True
+
+PIZZA:
+  is_identity: True
+
+HARBOR FREIGHT:
+  is_identity: True
+
+STARBUCKS:
+  is_identity: True
+
+
+Spotify:
+  is_identity: True
+
+Hinge:
+  is_identity: True
+
+CAVA MEZZE:
+  is_identity: True
+
+BUTCHERBOX:
+  is_identity: True
+
+BEAUTYCOUNTER:
+  is_identity: True
+
+AUTOZONE:
+  is_identity: True
+
+FOUR SEASONS GOLF:
+  is_identity: True
+
+DUNKIN:
+  is_identity: True
+
+JERSEY MIKES:
+  is_identity: True
+
+REI:
+  is_identity: True
+
+transfer:
+  is_identity: False
+  predicate: Payment Thank You - Web
+
+transfer:
+  is_identity: False
+  predicate: electronic funds transfer
+
+transfer:
+  is_identity: False
+  predicate: citi card online payment
+
+amazon:
+  is_identity: False
+  predicate: amzn
+
+rent cromwell:
+  is_identity: False
+  predicate: cromwell
+
+student loans:
+  is_identity: False
+  predicate: education student ln
+
+harris teeter:
+  is_identity: False
+  predicate: harris
+
+parking:
+  is_identity: False
+  predicate: garage
+
+parking:
+  is_identity: False
+  predicate: parkmobile
+
+parking:
+  is_identity: False
+  predicate: long term
+
+bird scooters:
+  is_identity: False
+  predicate: bird app
+
+foreign exchange fee:
+  is_identity: False
+  predicate: foreign exchange rate adjustment fee
+
+PayMyRent:
+  is_identity: False
+  predicate: turkson
+
+Parking:
+  is_identity: False
+  predicate: METER PARKIN
+
+advanced auto:
+  is_identity: False
+  predicate: ADVANCEAUTOPARTS
+
+Dicks Sporting:
+  is_identity: False
+  predicate: S SPORTING
+
+ADVANCED AUTO:
+  is_identity: False
+  predicate: ADVANCE AUTO
+
+whole foods:
+  is_identity: False
+  predicate: wholefds
