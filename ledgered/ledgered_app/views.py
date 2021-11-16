@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-
+from .upload_handler import handle_upload
 from .forms import FileUploadForm
+
 
 # Create your views here.
 def index(request):
@@ -8,21 +9,15 @@ def index(request):
     return render(request, 'ledgered_app/index.html')
 
 
-def handle_uploaded_file(file, account_type=None):
-    """Function to process file contents into the data base."""
-    assert file
-
-
 def upload(request):
     """Page to upload transaction files."""
 
     if request.method == 'POST':
-        print("$ HEY this printed")
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            print("$ FORM is valid")
-            handle_uploaded_file(request.FILES['file']) # todo also pass in the file type paramters: request.POST['access the form contents?']
-            return redirect('ledgered_app:upload_success')
+            file_upload = form.save(commit=False)
+            new_entry_num=handle_upload(request.FILES['file'], file_upload.account_type)
+            return redirect(f'upload_success/{str(new_entry_num)}')
     else:
         form = FileUploadForm()
 
@@ -30,9 +25,9 @@ def upload(request):
     return render(request, 'ledgered_app/upload.html', context)
 
 
-def upload_success(request):
+def upload_success(request, new_entry_num):
     """Successful Upload"""
-    return render(request, 'ledgered_app/upload_success.html')
+    return render(request, 'ledgered_app/upload_success.html', context={"new_entry_num": new_entry_num})
 
 
 def ledger(request):

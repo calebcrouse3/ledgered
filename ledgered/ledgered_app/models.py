@@ -7,11 +7,11 @@ class Entry(models.Model):
     amount = models.FloatField()
     account = models.CharField(max_length=200)
     original_description = models.CharField(max_length=200)
-    pretty_description = models.CharField(max_length=200)
-    # optional ?
-    category = models.CharField(max_length=200)
-    subcategory = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)
+    # nullable
+    pretty_description = models.CharField(max_length=200, blank=True, null=True)
+    category = models.CharField(max_length=200, blank=True, null=True)
+    subcategory = models.CharField(max_length=200, blank=True, null=True)
 
 
 class Category(models.Model):
@@ -34,18 +34,15 @@ class Description(models.Model):
 
 
 # define plugin types
-AMAZON = "A"
-MINT = "M"
-
 PLUGINS = [
-    (AMAZON, "Amazon"),
-    (MINT, "Mint"),
+    ("A", "Amazon"),
+    ("M", "Mint"),
 ]
 
 class FileUpload(models.Model):
     account_type = models.CharField(
         max_length=2,
         choices=PLUGINS,
-        default=MINT,
+        default="M",
     )
     file = models.FileField()
