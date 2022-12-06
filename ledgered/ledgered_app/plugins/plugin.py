@@ -17,7 +17,7 @@ class Plugin():
 
 
     def process_line(self, line):
-        """Plits contents of a single csv line into a list"""
+        """Splits contents of a single csv line into a list"""
         return [re.sub(' +', ' ', x.replace('"', "")) for x in line.split(",")]
 
 

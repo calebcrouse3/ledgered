@@ -40,7 +40,3 @@ CRUD existing description rules. Will Update existing transactions accordingly
 - Transaction Manager
 CRUD ops on categories of existing transactions. Delete transactions from the data base all together. Add manual transactions
 
-
-### TODO List
-
-create function to generate default categories, subcategories, description_rules

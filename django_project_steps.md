@@ -7,7 +7,7 @@ create project folder (or just use github repo) \
 create virtual env \
 `virtualenv env` \
 `source env/bin/activate` \
-`pi3p install django`
+`pip3 install django`
 
 create django project \
 `django-admin startproject setlist_tracker .` \
