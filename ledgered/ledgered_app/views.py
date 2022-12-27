@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 
-from .seeding.populate import CategorySeeder
+from .seeder.seed import CategorySeeder, DescriptionSeeder, EntriesSeeder
 from .upload_handler import handle_upload
-from .forms import FileUploadForm
+from .forms import FileUploadForm, SeededForm
+from .models import Category, Description, Entry, Seeded
 
 
 # Create your views here.
@@ -59,6 +60,55 @@ def manage(request):
 
 
 def seeder(request):
-    cat_seeder = CategorySeeder()
-    cat_seeder.seed()
-    return render(request, 'ledgered_app/seeder.html')
+    """If not already called, this URL will populate the data base with category, entry, and description data"""
+    seeded = len(Seeded.objects.all()) > 0
+
+    if not seeded:
+        cat_seeder = CategorySeeder()
+        cat_seeder.seed()
+
+        descr_seeder = DescriptionSeeder()
+        descr_seeder.seed()
+
+        entries_seeder = EntriesSeeder()
+        entries_seeder.seed()
+
+        seeded_form = SeededForm({"seeded": True})
+        if seeded_form.is_valid():
+            seeded_obj = seeded_form.save(commit=False)
+            seeded_obj.save()
+
+    context = {"seeded": seeded}
+
+    return render(request, 'ledgered_app/seeder.html', context)
+
+
+def print_categories(request):
+    """Print all categories in data base"""
+
+    # dict where key is cat name and value is list of subcats 
+    cats_subcats = {}
+
+    categories = Category.objects.order_by('name')
+    for cat in categories:
+        # get subcategories for each category
+        subcategories = Category.objects.get(id=cat.id).subcategory_set.order_by('name')
+        cats_subcats[cat.name] = [subcat.name for subcat in subcategories]
+
+    context = {'cats_subcats': cats_subcats}
+
+    return render(request, 'ledgered_app/print_categories.html', context)
+
+
+def print_descriptions(request):
+    """Print all categories in data base"""
+    descriptions = Description.objects.order_by('is_identity')
+    context = {'descriptions': descriptions}
+    return render(request, 'ledgered_app/print_descriptions.html', context)
+
+
+def print_entries(request):
+    """Print all categories in data base"""
+    entries = Entry.objects.order_by('date_added')
+    context = {'entries': entries}
+    return render(request, 'ledgered_app/print_entries.html', context)

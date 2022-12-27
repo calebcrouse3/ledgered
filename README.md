@@ -1,10 +1,16 @@
 # ledgered
-track you expenses, in a ledger
+track your expenses, in a ledger
+
+### where you left off
+
+- seeding entries from csv file. not working yet
 
 ### TODO List
-- create function to generate default categories, subcategories, description_rules
+- create function to generate test entries
 - create plugin for chase credit card
 - make field entry_type for Model entry an enum
+- Make functionality to choose source of seeding data, either test data of default (calebs) data
+- get small samples of raw data transactions for resources where those raw transactions are not in the test entries data
 
 
 #### more commands
@@ -30,9 +36,10 @@ for subcat in subcats:
 ```
 
 
-view subcategories for a particular category
+view subcategories for a particular category.
 subcategory has a forgeign key as category which allows us to call "subcategory_set" on a category
 ```
 c = Category.objects.get(id=90)
 c.subcategory_set.all()
 ```
+

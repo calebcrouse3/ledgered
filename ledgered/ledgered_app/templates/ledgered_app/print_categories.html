@@ -1,0 +1,20 @@
+{% extends "ledgered_app/base.html" %}
+
+{% block content %}
+
+<p>Categories</p>
+
+<ul>
+{% for cat, subcats in cats_subcats.items %}
+<li>{{ cat }}</li>
+    <ul>
+    {% for subcat in subcats %}
+    <li>{{ subcat }}</li>
+    {% endfor %}
+    </ul>
+{% empty %}
+<li>No categories have been added yet.</li>
+{% endfor %}
+</ul>
+
+{% endblock content %}

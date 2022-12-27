@@ -1,9 +1,19 @@
 from django.db import models
 
+
+ENTRY_TYPES = [
+    ("C", "Credit"),
+    ("D", "Debit")
+]
+
 class Entry(models.Model):
     """An entry in your ledger"""
     date = models.DateField()
-    entry_type = models.CharField(max_length=200)
+    entry_type = models.CharField(
+        max_length=2,
+        choices=ENTRY_TYPES,
+        default="D",
+    )
     amount = models.FloatField()
     account = models.CharField(max_length=200)
     original_description = models.CharField(max_length=200)
@@ -65,12 +75,19 @@ class Description(models.Model):
 PLUGINS = [
     ("A", "Amazon"),
     ("M", "Mint"),
+    ("C", "Chase")
 ]
 
 class FileUpload(models.Model):
     account_type = models.CharField(
         max_length=2,
         choices=PLUGINS,
-        default="M",
+        default="C",
     )
     file = models.FileField()
+
+
+class Seeded(models.Model):
+    """Simple boolean to indicate is a user has had their account seeded yet"""
+    seeded = models.BooleanField()
+    date_added = models.DateTimeField(auto_now_add=True)

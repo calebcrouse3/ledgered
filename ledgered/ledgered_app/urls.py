@@ -12,5 +12,11 @@ urlpatterns = [
     path('reports', views.reports, name='reports'),
     path('manage', views.manage, name='manage'),
     path('upload_success/<int:new>/<int:updated>/<int:duplicate>/<int:error>/', views.upload_success, name='upload_success'),
-    path('seeder', views.seeder, name='seeder')
+    path('seeder', views.seeder, name='seeder'),
+
+    # for debugging
+    path('print_categories', views.print_categories, name='print_categories'),
+    path('print_descriptions', views.print_descriptions, name='print_descriptions'),
+    path('print_entries', views.print_entries, name='print_entries')
 ]
+

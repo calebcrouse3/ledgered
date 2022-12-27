@@ -1,0 +1,53 @@
+# short list of description rules for testing
+ironnet:
+  is_identity: True
+
+robinhood:
+  is_identity: True
+
+home depot:
+  is_identity: True
+
+simple:
+  is_identity: True
+
+atm:
+  is_identity: True
+
+coinbase:
+  is_identity: True
+
+chase card:
+  is_identity: True
+
+citi:
+  is_identity: True
+
+parking:
+  is_identity: True
+
+5guys:
+  is_identity: True
+
+prime video:
+  is_identity: True
+
+transfer:
+  is_identity: False
+  predicate: Payment Thank You - Web
+
+transfer:
+  is_identity: False
+  predicate: electronic funds transfer
+
+transfer:
+  is_identity: False
+  predicate: citi card online payment
+
+amazon:
+  is_identity: False
+  predicate: amzn
+
+student loans:
+  is_identity: False
+  predicate: education student ln

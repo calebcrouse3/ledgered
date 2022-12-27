@@ -1,0 +1,20 @@
+{% extends "ledgered_app/base.html" %}
+
+{% block content %}
+
+<table>
+    <tr>
+      <th>Descrption</th>
+      <th>Predicate</th>
+      <th>Is Identity</th>
+    </tr>
+    {% for d in descriptions %}
+    <tr>
+        <td><b>|| </b>{{ d.description }} </td>
+        <td><b>|| </b>{{ d.predicate }} </td>
+        <td><b>|| </b>{{ d.is_identity }} </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

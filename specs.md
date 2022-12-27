@@ -13,9 +13,9 @@ and reports of your labeled transactions to analyze you spending habits.
 - Ledger
 - Reports
 - Manage
-    - Category Manager
-    - Description Manager
-    - Transaction Manager
+- Category Manager
+- Description Manager
+- Transaction Manager
 
 
 ### Page Descriptions:

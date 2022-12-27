@@ -1,5 +1,5 @@
 from django import forms
-from .models import FileUpload, Entry, Category, Subcategory, Description
+from .models import FileUpload, Entry, Category, Subcategory, Description, Seeded
 
 
 class FileUploadForm(forms.ModelForm):
@@ -55,4 +55,11 @@ class DescriptionForm(forms.ModelForm):
             'is_identity',
             'description',
             'predicate',
+        ]
+
+class SeededForm(forms.ModelForm):
+    class Meta:
+        model = Seeded
+        fields = [
+            'seeded',
         ]
