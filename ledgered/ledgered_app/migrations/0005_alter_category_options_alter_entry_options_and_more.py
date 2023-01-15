@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='entry',
-            options={'verbose_name_plural': 'entries'},
+            options={'verbose_name_plural': 'transactions'},
         ),
         migrations.AlterModelOptions(
             name='subcategory',

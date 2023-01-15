@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect
 
-from .seeder.seed import CategorySeeder, DescriptionSeeder, EntriesSeeder
+from .seeder.seed import CategorySeeder, DescriptionSeeder, TranscationSeeder
 from .upload_handler import handle_upload
 from .forms import FileUploadForm, SeededForm
-from .models import Category, Description, Entry, Seeded
+from .models import Category, Description, Transaction, Seeded
 
 
 # Create your views here.
@@ -45,7 +45,7 @@ def upload_success(request, new, updated, duplicate, error):
 
 
 def ledger(request):
-    """Page to categorize new ledger entries."""
+    """Page to categorize new ledger transactions."""
     return render(request, 'ledgered_app/ledger.html')
 
 
@@ -70,7 +70,7 @@ def seeder(request):
         descr_seeder = DescriptionSeeder()
         descr_seeder.seed()
 
-        entries_seeder = EntriesSeeder()
+        entries_seeder = TranscationSeeder()
         entries_seeder.seed()
 
         seeded_form = SeededForm({"seeded": True})
@@ -107,8 +107,8 @@ def print_descriptions(request):
     return render(request, 'ledgered_app/print_descriptions.html', context)
 
 
-def print_entries(request):
+def print_transactions(request):
     """Print all categories in data base"""
-    entries = Entry.objects.order_by('date_added')
-    context = {'entries': entries}
-    return render(request, 'ledgered_app/print_entries.html', context)
+    transactions = Transaction.objects.order_by('date_added')
+    context = {'transactions': transactions}
+    return render(request, 'ledgered_app/print_transactions.html', context)

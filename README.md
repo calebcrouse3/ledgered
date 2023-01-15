@@ -2,16 +2,18 @@
 track your expenses, in a ledger
 
 ### where you left off
-
-- seeding entries from csv file. not working yet
+Fidelity file upload working
 
 ### TODO List
-- create function to generate test entries
-- create plugin for chase credit card
-- make field entry_type for Model entry an enum
-- Make functionality to choose source of seeding data, either test data of default (calebs) data
-- get small samples of raw data transactions for resources where those raw transactions are not in the test entries data
+1. Find more graceful way to define and enforce the plugin types and transaction types (constants) and use them throughout
+2. Find graceful way to enforce schemas of dataframe coming out of the plugin and going into data aggregation
+3. Is there a way to fail when processing raw transaction df by only dropping a single row and not the whole data frame?
+   4. Maybe do everything like by line and without pandas? Even the aggregation? Or maybe just do as little as possible with pandas
+4. Find better way to do more error handling during file upload process
+5. Figure out how to prevent data duplication for descriptions when seeding data
 
+- revisit enums being a single letter versus a whole word and just yeah whats up with enums
+- Make functionality to choose source of seeding data, either test data of default (caleb's) data
 
 #### more commands
 open django shell

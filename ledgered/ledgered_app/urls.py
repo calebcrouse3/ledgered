@@ -17,6 +17,6 @@ urlpatterns = [
     # for debugging
     path('print_categories', views.print_categories, name='print_categories'),
     path('print_descriptions', views.print_descriptions, name='print_descriptions'),
-    path('print_entries', views.print_entries, name='print_entries')
+    path('print_transactions', views.print_transactions, name='print_transactions')
 ]
 

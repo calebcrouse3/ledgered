@@ -1,17 +1,18 @@
 from django.db import models
 
 
-ENTRY_TYPES = [
+TRANSACTION_TYPES = [
     ("C", "Credit"),
     ("D", "Debit")
 ]
 
-class Entry(models.Model):
-    """An entry in your ledger"""
+
+class Transaction(models.Model):
+    """A transaction in your ledger"""
     date = models.DateField()
-    entry_type = models.CharField(
+    type = models.CharField(
         max_length=2,
-        choices=ENTRY_TYPES,
+        choices=TRANSACTION_TYPES,
         default="D",
     )
     amount = models.FloatField()
@@ -23,16 +24,13 @@ class Entry(models.Model):
     category = models.CharField(max_length=200, blank=True, null=True)
     subcategory = models.CharField(max_length=200, blank=True, null=True)
 
-    class Meta:
-        verbose_name_plural = 'entries'
-
     def __str__(self):
-        """Return a simple string representing the entry."""
+        """Return a simple string representing the transaction."""
         return f"{self.original_description}: {self.amount}..."
 
 
 class Category(models.Model):
-    """An entry category"""
+    """A transaction category"""
     name = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)
 
@@ -40,12 +38,12 @@ class Category(models.Model):
         verbose_name_plural = 'categories'
 
     def __str__(self):
-        """Return a simple string representing the entry."""
+        """Return a simple string representing the transaction."""
         return f"{self.name}..."
 
 
 class Subcategory(models.Model):
-    """An entry subcategory"""
+    """A transaction subcategory"""
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)
@@ -54,12 +52,12 @@ class Subcategory(models.Model):
         verbose_name_plural = 'subcategories'
 
     def __str__(self):
-        """Return a simple string representing the entry."""
+        """Return a simple string representing the transaction."""
         return f"{self.name}..."
 
 
 class Description(models.Model):
-    """A discription rule. Used to guess the correct category and subcateogry for a transaction"""
+    """A description rule. Used to guess the correct category and sub_category for a transaction"""
     # a boolean indicating if the description rule is an identify rule
     is_identity = models.BooleanField()
     description = models.CharField(max_length=200)
@@ -67,7 +65,7 @@ class Description(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        """Return a simple string representing the entry."""
+        """Return a simple string representing the transaction."""
         return f"{self.predicate}, {self.description}..."
 
 
@@ -75,14 +73,16 @@ class Description(models.Model):
 PLUGINS = [
     ("A", "Amazon"),
     ("M", "Mint"),
-    ("C", "Chase")
+    ("C", "Chase"),
+    ("F", "Fidelity")
 ]
+
 
 class FileUpload(models.Model):
     account_type = models.CharField(
         max_length=2,
         choices=PLUGINS,
-        default="C",
+        default="F",
     )
     file = models.FileField()
 

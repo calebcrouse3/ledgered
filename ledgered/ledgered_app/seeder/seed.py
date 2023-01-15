@@ -6,7 +6,7 @@ Could be used to faciliate a description and category reset
 import yaml
 import os
 import csv
-from ..forms import CategoryForm, SubcategoryForm, DescriptionForm, EntryForm
+from ..forms import CategoryForm, SubcategoryForm, DescriptionForm, TransactionForm
 from ..models import Category
 
 
@@ -31,13 +31,11 @@ class Seeder():
                 return yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
-
-    def load_csv(self, file_path) -> dict:
-        """ return a csv reader on which you can call next line"""
-        with open(file_path, newline='') as csvfile:
-            csv_reader = csv.reader(file_path, delimiter=' ', quotechar='|')
-            return [row for row in csv_reader]
             
+    def load_csv(self, file_path) -> dict:
+        with open(file_path, 'r') as read_obj:
+            csv_reader = csv.reader(read_obj)
+            return list(csv_reader)
 
 
 class CategorySeeder(Seeder):
@@ -93,9 +91,9 @@ class DescriptionSeeder(Seeder):
                 descr_obj.save()
 
 
-class EntriesSeeder(Seeder):
+class TranscationSeeder(Seeder):
     def __init__(self):
-        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/entries/test.csv"
+        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/test.csv"
 
     def seed(self):
         csv_data = self.load_csv(self.SEED_FILEPATH)
@@ -103,17 +101,17 @@ class EntriesSeeder(Seeder):
         for row in csv_data:
             entry_data = {
                 'date': row[0],
-                'entry_type': row[1],
+                'type': row[1],
                 'amount': row[2],
                 'account': row[3],
                 'original_description': row[4],
                 'pretty_description': row[5],
                 'category': row[6],
-                'subcategory': row[7] 
+                'subcategory': row[7]
             }
 
-            entry_form = EntryForm(entry_data)
+            transaction_form = TransactionForm(entry_data)
 
-            if entry_form.is_valid():
-                entry_obj = entry_form.save(commit=False)
+            if transaction_form.is_valid():
+                entry_obj = transaction_form.save(commit=False)
                 entry_obj.save()
