@@ -20,7 +20,7 @@ from ..models import Transaction
 class Plugin:
     def __init__(self):
         self.INPUT_SCHEMA = self.get_input_schema()
-        self.ACCOUNT_NAME = self.get_account_name()
+        self.ACCOUNT_ID = self.get_account_id()
 
     """
     Abstract methods
@@ -30,7 +30,7 @@ class Plugin:
         """List of expected columns from a file upload csv for this plugin type"""
         pass
 
-    def get_account_name(self):
+    def get_account_id(self):
         """Get the account name of this plugin"""
         pass
 
@@ -142,7 +142,7 @@ class Plugin:
             "date": row["date"],
             "type": row["type"],
             "amount": row["amount"],
-            "account": self.ACCOUNT_NAME,
+            "account": self.ACCOUNT_ID,
             "original_description": row["original_description"],
             "pretty_description": None,
             "category": None,

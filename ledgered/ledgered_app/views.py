@@ -45,8 +45,25 @@ def upload_success(request, new, updated, duplicate, error):
 
 
 def ledger(request):
+    """Entry point for categorizing new transactions."""
+    e = Transaction.objects.filter(category=None)
+    num_uncategorized = len(e)
+    context = {"num_uncategorized": num_uncategorized}
+    return render(request, 'ledgered_app/ledger.html', context)
+
+
+def categorize(request):
     """Page to categorize new ledger transactions."""
-    return render(request, 'ledgered_app/ledger.html')
+    next_uncategorized = Transaction.objects.filter(category=None)[0]
+    context = {"next_uncategorized": next_uncategorized}
+    return render(request, 'ledgered_app/categorize.html', context)
+
+
+def update_category(request):
+    """Page to categorize new ledger transactions."""
+    next_uncategorized = Transaction.objects.filter(category=None)[0]
+    context = {"next_uncategorized": next_uncategorized}
+    return render(request, 'ledgered_app/categorize.html', context)
 
 
 def reports(request):

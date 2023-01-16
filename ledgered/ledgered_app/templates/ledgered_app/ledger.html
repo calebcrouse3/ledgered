@@ -1,5 +1,8 @@
 {% extends "ledgered_app/base.html" %}
 
 {% block content %}
-<p>Here you will categorize new entries</p>
+<p>
+    You have {{ num_uncategorized }} uncategorized transactions!
+    <a href="{% url 'ledgered_app:categorize' %}">Categorize Transactions</a>
+</p>
 {% endblock content %}

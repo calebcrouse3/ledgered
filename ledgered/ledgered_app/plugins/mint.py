@@ -27,8 +27,8 @@ class MintPlugin(Plugin):
             "notes",
         ]
 
-    def get_account_name(self):
-        return "Mint"
+    def get_account_id(self):
+        return "M"
 
     def process_raw_transaction_df(self, df):
         df["amount"] = df["amount"].astype(float)

@@ -1,0 +1,10 @@
+{% extends "ledgered_app/base.html" %}
+
+{% block content %}
+<p>
+    Next uncategorized transaction
+    {{ next_transaction }}
+    <a href="{% url 'ledgered_app:update_categories' %}">Save</a>
+    <a href="{% url 'ledgered_app:ledgered' %}">Exit</a>
+</p>
+{% endblock content %}

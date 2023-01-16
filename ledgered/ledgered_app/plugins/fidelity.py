@@ -21,8 +21,8 @@ class FidelityPlugin(Plugin):
             "amount"
         ]
 
-    def get_account_name(self):
-        return "Fidelity"
+    def get_account_id(self):
+        return "F"
 
     def process_raw_transaction_df(self, df):
         processed_df = df.copy()

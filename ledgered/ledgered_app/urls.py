@@ -9,6 +9,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('upload', views.upload, name='upload'),
     path('ledger', views.ledger, name='ledger'),
+    path('categorize', views.categorize, name='categorize'),
     path('reports', views.reports, name='reports'),
     path('manage', views.manage, name='manage'),
     path('upload_success/<int:new>/<int:updated>/<int:duplicate>/<int:error>/', views.upload_success, name='upload_success'),
