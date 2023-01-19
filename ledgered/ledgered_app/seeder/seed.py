@@ -83,7 +83,6 @@ class DescriptionSeeder(Seeder):
             else:
                 descr_data["predicate"] = descr
 
-
             descr_form = DescriptionForm(descr_data)
 
             if descr_form.is_valid():

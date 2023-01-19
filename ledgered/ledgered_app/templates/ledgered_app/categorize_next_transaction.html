@@ -1,0 +1,14 @@
+{% extends "ledgered_app/base.html" %}
+
+{% block content %}
+<p>
+    <br>Remaining Transactions: {{ num_uncategorized }}
+    <br>Next Uncategorized Transaction:
+    <form action="{% url 'ledgered_app:categorize_next_transaction' %}" method='post'>
+        {% csrf_token %}
+        {{ form.as_div }}
+        <button name="submit">Save and Continue</button>
+    </form>
+    <a href="{% url 'ledgered_app:ledger' %}">Exit</a>
+</p>
+{% endblock content %}

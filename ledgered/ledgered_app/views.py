@@ -46,27 +46,41 @@ def upload_success(request, new, updated, duplicate, error):
 
 def ledger(request):
     """Entry point for categorizing new transactions."""
-    e = Transaction.objects.filter(category=None)
-    num_uncategorized = len(e)
-    next_uncategorized = e[0]
-    context = {"num_uncategorized": num_uncategorized, "next_uncategorized": next_uncategorized}
+    cat_data = get_cat_data()
+    context = {
+        "num_uncategorized": cat_data["num"],
+    }
     return render(request, 'ledgered_app/ledger.html', context)
 
 
-def edit_category(request, transaction_id):
+def get_cat_data():
+    t = Transaction.objects.filter(category=None)
+    data = {"num": len(t), "next": None}
+    if data["num"] > 0:
+        data["next"] = t[0]
+    return data
+
+
+def categorize_next_transaction(request):
     """Edit the category and subcategory of a transaction."""
-    t = Transaction.objects.get(id=transaction_id)
+    cat_data = get_cat_data()
+    t = cat_data["next"]
+
+    # if no remaining transactions go back to ledger landing page
+    if cat_data["num"] == 0:
+        return redirect('ledgered_app:ledger')
 
     if request.method != 'POST':
+        # TODO make the only visible subcategories those that are a foreign key of the category
         form = TransactionForm(instance=t)
     else:
         form = TransactionForm(instance=t, data=request.POST)
         if form.is_valid():
             form.save()
-            return redirect('ledgered_app:ledger')
+            return redirect('ledgered_app:categorize_next_transaction')
 
-    context = {'transaction': t, 'form': form}
-    return render(request, 'ledgered_app/edit_category.html', context)
+    context = {'transaction': t, 'form': form, "num_uncategorized": cat_data["num"]}
+    return render(request, 'ledgered_app/categorize_next_transaction.html', context)
 
 
 def reports(request):
