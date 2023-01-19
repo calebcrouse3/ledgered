@@ -4,6 +4,7 @@ track your expenses, in a ledger
 ### where you left off
 Fidelity file upload working
 
+
 ### TODO List
 1. Find more graceful way to define and enforce the plugin types and transaction types (constants) and use them throughout
 2. Find graceful way to enforce schemas of dataframe coming out of the plugin and going into data aggregation

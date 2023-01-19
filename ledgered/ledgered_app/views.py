@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 
 from .seeder.seed import CategorySeeder, DescriptionSeeder, TranscationSeeder
 from .upload_handler import handle_upload
-from .forms import FileUploadForm, SeededForm
+from .forms import FileUploadForm, SeededForm, TransactionForm
 from .models import Category, Description, Transaction, Seeded
 
 
@@ -48,22 +48,25 @@ def ledger(request):
     """Entry point for categorizing new transactions."""
     e = Transaction.objects.filter(category=None)
     num_uncategorized = len(e)
-    context = {"num_uncategorized": num_uncategorized}
+    next_uncategorized = e[0]
+    context = {"num_uncategorized": num_uncategorized, "next_uncategorized": next_uncategorized}
     return render(request, 'ledgered_app/ledger.html', context)
 
 
-def categorize(request):
-    """Page to categorize new ledger transactions."""
-    next_uncategorized = Transaction.objects.filter(category=None)[0]
-    context = {"next_uncategorized": next_uncategorized}
-    return render(request, 'ledgered_app/categorize.html', context)
+def edit_category(request, transaction_id):
+    """Edit the category and subcategory of a transaction."""
+    t = Transaction.objects.get(id=transaction_id)
 
+    if request.method != 'POST':
+        form = TransactionForm(instance=t)
+    else:
+        form = TransactionForm(instance=t, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('ledgered_app:ledger')
 
-def update_category(request):
-    """Page to categorize new ledger transactions."""
-    next_uncategorized = Transaction.objects.filter(category=None)[0]
-    context = {"next_uncategorized": next_uncategorized}
-    return render(request, 'ledgered_app/categorize.html', context)
+    context = {'transaction': t, 'form': form}
+    return render(request, 'ledgered_app/edit_category.html', context)
 
 
 def reports(request):
