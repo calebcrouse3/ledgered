@@ -12,6 +12,7 @@ Fidelity file upload working
    4. Maybe do everything like by line and without pandas? Even the aggregation? Or maybe just do as little as possible with pandas
 4. Find better way to do more error handling during file upload process
 5. Figure out how to prevent data duplication for descriptions when seeding data
+6. Make account a db value
 
 - revisit enums being a single letter versus a whole word and just yeah whats up with enums
 - Make functionality to choose source of seeding data, either test data of default (caleb's) data
