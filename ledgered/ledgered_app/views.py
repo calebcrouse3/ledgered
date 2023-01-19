@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect
 
-from .seeder.seed import CategorySeeder, DescriptionSeeder, TranscationSeeder
+from .seeder.seed import CategorySeeder, DescriptionSeeder, TransactionSeeder, AccountSeeder
 from .upload_handler import handle_upload
 from .forms import FileUploadForm, SeededForm, TransactionForm
-from .models import Category, Description, Transaction, Seeded
+from .models import Category, Description, Transaction, Seeded, Subcategory, Account
 
 
 # Create your views here.
@@ -84,13 +84,16 @@ def seeder(request):
     seeded = len(Seeded.objects.all()) > 0
 
     if not seeded:
+        account_seeder = AccountSeeder()
+        account_seeder.seed()
+
         cat_seeder = CategorySeeder()
         cat_seeder.seed()
 
         descr_seeder = DescriptionSeeder()
         descr_seeder.seed()
 
-        entries_seeder = TranscationSeeder()
+        entries_seeder = TransactionSeeder()
         entries_seeder.seed()
 
         seeded_form = SeededForm({"seeded": True})
@@ -132,3 +135,14 @@ def print_transactions(request):
     transactions = Transaction.objects.order_by('date_added')
     context = {'transactions': transactions}
     return render(request, 'ledgered_app/print_transactions.html', context)
+
+
+def delete_all(request):
+    """Page to manage user data."""
+    Transaction.objects.all().delete()
+    Category.objects.all().delete()
+    Subcategory.objects.all().delete()
+    Description.objects.all().delete()
+    Seeded.objects.all().delete()
+    Account.objects.all().delete()
+    return render(request, 'ledgered_app/delete_all.html')

@@ -6,8 +6,8 @@ Could be used to faciliate a description and category reset
 import yaml
 import os
 import csv
-from ..forms import CategoryForm, SubcategoryForm, DescriptionForm, TransactionForm
-from ..models import Category
+from ..forms import CategoryForm, SubcategoryForm, DescriptionForm, TransactionForm, AccountForm
+from ..models import PLUGINS, Account
 
 
 class Seeder():
@@ -91,23 +91,31 @@ class DescriptionSeeder(Seeder):
                 descr_obj.save()
 
 
-class TranscationSeeder(Seeder):
+class AccountSeeder(Seeder):
+    def seed(self):
+        for name, pretty_name in PLUGINS:
+            account_form = AccountForm({"name": name})
+
+            if account_form.is_valid():
+                account_obj = account_form.save(commit=False)
+                account_obj.save()
+
+
+class TransactionSeeder(Seeder):
     def __init__(self):
-        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/test.csv"
+        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/test_no_cats.csv"
 
     def seed(self):
         csv_data = self.load_csv(self.SEED_FILEPATH)
 
         for row in csv_data:
+
             entry_data = {
                 'date': row[0],
                 'type': row[1],
                 'amount': row[2],
-                'account': row[3],
-                'original_description': row[4],
-                'pretty_description': row[5],
-                'category': row[6],
-                'subcategory': row[7]
+                'account': Account.objects.get(name=row[3]),
+                'original_description': row[4]
             }
 
             transaction_form = TransactionForm(entry_data)
@@ -115,3 +123,6 @@ class TranscationSeeder(Seeder):
             if transaction_form.is_valid():
                 entry_obj = transaction_form.save(commit=False)
                 entry_obj.save()
+            else:
+                print(f"filed to validate transaction form with data {entry_data}")
+                print(f"ERROR: {transaction_form.errors}")
