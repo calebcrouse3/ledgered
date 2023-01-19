@@ -102,7 +102,7 @@ class AccountSeeder(Seeder):
 
 class TransactionSeeder(Seeder):
     def __init__(self):
-        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/test_no_cats.csv"
+        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/test.csv"
 
     def seed(self):
         csv_data = self.load_csv(self.SEED_FILEPATH)

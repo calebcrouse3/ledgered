@@ -61,6 +61,20 @@ def get_cat_data():
     return data
 
 
+def get_pretty_description(original_description):
+    # first check for predicate rules
+    # TODO i forget why you might want a predicate rule or how they work so skip for now
+    # then check for identity rules
+    # this is gonna be inefficient because it has to load all the rules each time
+    # todo need to go back to a little more smart rule adding but for now its just going to return
+    # the first rule description that matches any predicate
+    # something about using the rule that matches to the longest predicate?
+    for rule in Description.objects.all():
+        if rule.predicate.lower() in original_description.lower():
+            return rule.description
+    return None
+
+
 def categorize_next_transaction(request):
     """Edit the category and subcategory of a transaction."""
     cat_data = get_cat_data()
@@ -72,6 +86,9 @@ def categorize_next_transaction(request):
 
     if request.method != 'POST':
         # TODO make the only visible subcategories those that are a foreign key of the category
+        # get pretty description if a rule matches
+        t.pretty_description = get_pretty_description(t.original_description)
+        # data={"pretty_description": pretty_description}
         form = TransactionForm(instance=t)
     else:
         form = TransactionForm(instance=t, data=request.POST)
