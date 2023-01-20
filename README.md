@@ -4,6 +4,7 @@ track your expenses, in a ledger
 ### where you left off
 Fidelity file upload working
 
+Working on cascading drop downs. glitch where we can only submit a form on the second attempt. Maybe look for other tutorials
 
 ### TODO List
 1. Find more graceful way to define and enforce the plugin types and transaction types (constants) and use them throughout

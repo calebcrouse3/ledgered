@@ -14,11 +14,12 @@ urlpatterns = [
     path('manage', views.manage, name='manage'),
     path('upload_success/<int:new>/<int:updated>/<int:duplicate>/<int:error>/', views.upload_success, name='upload_success'),
     path('seeder', views.seeder, name='seeder'),
+    path('ajax/load_subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
 
     # for debugging
+    path('transaction_list', views.TransactionListView.as_view(), name='transaction_list'),
+    path('description_list', views.DescriptionListView.as_view(), name='description_list'),
     path('delete_all', views.delete_all, name='delete_all'),
-    path('print_categories', views.print_categories, name='print_categories'),
-    path('print_descriptions', views.print_descriptions, name='print_descriptions'),
-    path('print_transactions', views.print_transactions, name='print_transactions')
+    path('categories_list', views.list_categories, name='categories_list')
 ]
 

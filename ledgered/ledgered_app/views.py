@@ -4,6 +4,7 @@ from .seeder.seed import CategorySeeder, DescriptionSeeder, TransactionSeeder, A
 from .upload_handler import handle_upload
 from .forms import FileUploadForm, SeededForm, TransactionForm
 from .models import Category, Description, Transaction, Seeded, Subcategory, Account
+from django.views.generic import ListView, CreateView, UpdateView
 
 
 # Create your views here.
@@ -51,6 +52,12 @@ def ledger(request):
         "num_uncategorized": cat_data["num"],
     }
     return render(request, 'ledgered_app/ledger.html', context)
+
+
+def load_subcategories(request):
+    category_id = request.GET.get('category')
+    subcategories = Subcategory.objects.filter(category_id=category_id).order_by('name')
+    return render(request, 'ledgered_app/subcategory_dropdown_list_options.html', {'subcategories': subcategories})
 
 
 def get_cat_data():
@@ -137,7 +144,7 @@ def seeder(request):
     return render(request, 'ledgered_app/seeder.html', context)
 
 
-def print_categories(request):
+def list_categories(request):
     """Print all categories in data base"""
 
     # dict where key is cat name and value is list of subcats 
@@ -151,21 +158,7 @@ def print_categories(request):
 
     context = {'cats_subcats': cats_subcats}
 
-    return render(request, 'ledgered_app/print_categories.html', context)
-
-
-def print_descriptions(request):
-    """Print all categories in data base"""
-    descriptions = Description.objects.order_by('is_identity')
-    context = {'descriptions': descriptions}
-    return render(request, 'ledgered_app/print_descriptions.html', context)
-
-
-def print_transactions(request):
-    """Print all categories in data base"""
-    transactions = Transaction.objects.order_by('date_added')
-    context = {'transactions': transactions}
-    return render(request, 'ledgered_app/print_transactions.html', context)
+    return render(request, 'ledgered_app/list_categories.html', context)
 
 
 def delete_all(request):
@@ -177,3 +170,11 @@ def delete_all(request):
     Seeded.objects.all().delete()
     Account.objects.all().delete()
     return render(request, 'ledgered_app/delete_all.html')
+
+
+class TransactionListView(ListView):
+    model = Transaction
+
+
+class DescriptionListView(ListView):
+    model = Description

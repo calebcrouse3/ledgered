@@ -1,14 +1,37 @@
 {% extends "ledgered_app/base.html" %}
 
 {% block content %}
-<p>
-    <br>Remaining Transactions: {{ num_uncategorized }}
-    <br>Next Uncategorized Transaction:
-    <form action="{% url 'ledgered_app:categorize_next_transaction' %}" method='post'>
+
+    <h2>Remaining Transactions: {{ num_uncategorized }}</h2>
+
+    <form
+        action="{% url 'ledgered_app:categorize_next_transaction' %}"
+        method='post'
+        data-subcategories-url="{% url 'ledgered_app:ajax_load_subcategories' %}"
+        id="transactionForm">
         {% csrf_token %}
-        {{ form.as_div }}
+        {{ form.as_p }}
         <button name="submit">Save and Continue</button>
     </form>
     <a href="{% url 'ledgered_app:ledger' %}">Exit</a>
-</p>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+    $("#id_category").change(function () {
+      var url = $("#transactionForm").attr("data-subcategories-url");  // get the url of the `load_subcategories` view
+      var categoryId = $(this).val();  // get the selected category ID from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url,                    // set the url of the request (= localhost:8000/ajax/load_subcategories/)
+        data: {
+          'category': categoryId       // add the country id to the GET parameters
+        },
+        success: function (data) {   // `data` is the return of the `load_subcategories` view function
+          $("#id_subcategory").html(data);  // replace the contents of the subcategory input with the data that came from the server
+        }
+      });
+
+    });
+    </script>
+
 {% endblock content %}
