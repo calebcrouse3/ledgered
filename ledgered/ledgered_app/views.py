@@ -92,16 +92,21 @@ def categorize_next_transaction(request):
         return redirect('ledgered_app:ledger')
 
     if request.method != 'POST':
-        # TODO make the only visible subcategories those that are a foreign key of the category
-        # get pretty description if a rule matches
         t.pretty_description = get_pretty_description(t.original_description)
-        # data={"pretty_description": pretty_description}
         form = TransactionForm(instance=t)
     else:
+        print(request.POST)
         form = TransactionForm(instance=t, data=request.POST)
+        print("form created")
+        print(form.data)
         if form.is_valid():
+            print("form is valid")
             form.save()
             return redirect('ledgered_app:categorize_next_transaction')
+        else:
+            print("form was invalid")
+            print(form.errors)
+            return render(request, 'ledgered_app/invalid_transaction_form.html', {'error': form.errors})
 
     context = {'transaction': t, 'form': form, "num_uncategorized": cat_data["num"]}
     return render(request, 'ledgered_app/categorize_next_transaction.html', context)

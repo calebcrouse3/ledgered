@@ -1,0 +1,9 @@
+{% extends "ledgered_app/base.html" %}
+
+{% block content %}
+<p>
+    There was an error with this form
+    {{ error }}
+    <a href="{% url 'ledgered_app:index' %}">Return Home</a>
+</p>
+{% endblock content %}

@@ -15,6 +15,7 @@ urlpatterns = [
     path('upload_success/<int:new>/<int:updated>/<int:duplicate>/<int:error>/', views.upload_success, name='upload_success'),
     path('seeder', views.seeder, name='seeder'),
     path('ajax/load_subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
+    path('invalid_transaction_form', views.categorize_next_transaction, name='invalid_transaction_form'),
 
     # for debugging
     path('transaction_list', views.TransactionListView.as_view(), name='transaction_list'),
