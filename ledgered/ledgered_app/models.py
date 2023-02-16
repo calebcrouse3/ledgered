@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 
 TRANSACTION_TYPES = [
@@ -17,7 +19,6 @@ SEED_TYPES = [
     ("U", "Uncategorized"),
     ("C", "Categorized"),
 ]
-
 
 class Account(models.Model):
     """A transaction category"""
@@ -112,9 +113,7 @@ class FileUpload(models.Model):
 
 class SeedRequest(models.Model):
     """Simple boolean to indicate is a user has had their account seeded yet"""
-    seed_type = models.CharField(
-        max_length=2,
-        choices=SEED_TYPES,
-        default="U",
-    )
+    descriptions_filename = models.CharField(max_length=200)
+    categories_filename = models.CharField(max_length=200)
+    transactions_filename = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)

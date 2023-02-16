@@ -70,6 +70,4 @@ class DescriptionForm(forms.ModelForm):
 class SeedRequestForm(forms.ModelForm):
     class Meta:
         model = SeedRequest
-        fields = [
-            'seed_type'
-        ]
+        fields = '__all__'

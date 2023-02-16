@@ -3,7 +3,10 @@ track your expenses, in a ledger
 
 ### where you left off
 
-Seeding with test data that already has category data not working.
+get_matching_transactions not finding matching transactions (maybe because it errors when it doesn't match?)
+Should account be a database option? Need to fix where we enter in uploaded transactions account value
+Account needs to be a database value and you can only upload accounts after adding the database value. Just use seed the database with all the accounts we have plugins for.
+Need to be able to seed description/categories/accounts different from transactions because we might want to get transactions through a raw upload
 
 ### TODO List
 1. Find more graceful way to define and enforce the plugin types and transaction types (constants) and use them throughout

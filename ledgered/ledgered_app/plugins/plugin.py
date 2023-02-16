@@ -42,6 +42,12 @@ class Plugin:
     Defined methods
     """
 
+    def sign_to_type(self, number):
+        if float(number) > 0:
+            return "C"
+        else:
+            return "D"
+
     def to_snake_string(self, s):
         """convert title strings to snake case"""
         return s.replace(" ", "_").lower()
@@ -71,15 +77,14 @@ class Plugin:
         return that entry. This function is used to determine when we are trying to upload
         a file with transactions that already exist in the database and should not be
         uploaded twice.
+
+        Since we are aggregating on day there should only be at most one matching transaction in the database
         """
 
-        e = (
-            Transaction.objects
-            .filter(date=form.data["date"])
-            .filter(account=form.data["account"])
-            .filter(type=form.data["type"])
-            .filter(original_description=form.data["original_description"])
-        )
+        print(form.data)
+
+        # TODO here this is messed up
+        e = Transaction.objects.filter(date=form.data["date"])#.filter(account=form.data["account"]).filter(type=form.data["type"]).filter(original_description=form.data["original_description"])
 
         if len(e) > 0:
 

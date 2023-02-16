@@ -7,7 +7,7 @@ import yaml
 import os
 import csv
 from ..forms import CategoryForm, SubcategoryForm, DescriptionForm, TransactionForm, AccountForm
-from ..models import PLUGINS, Account
+from ..models import PLUGINS, Account, Category, Subcategory
 
 
 class Seeder:
@@ -39,10 +39,10 @@ class Seeder:
 
 
 class CategorySeeder(Seeder):
-    """Seed the database with the test.yml categories"""
+    """Seed the database with the categories"""
 
-    def __init__(self):
-        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/categories/test.yml"
+    def __init__(self, source_filename):
+        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/categories/" + source_filename
 
     def seed(self):
         values = self.load_yaml(self.SEED_FILEPATH)
@@ -66,8 +66,8 @@ class CategorySeeder(Seeder):
 
 
 class DescriptionSeeder(Seeder):
-    def __init__(self):
-        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/descriptions/test.yml"
+    def __init__(self, source_filename):
+        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/descriptions/" + source_filename
 
     def seed(self):
         values = self.load_yaml(self.SEED_FILEPATH)
@@ -101,10 +101,8 @@ class AccountSeeder(Seeder):
 
 
 class TransactionSeeder(Seeder):
-    def __init__(self, categorized):
-        filename = "test.csv" if not categorized else "test_categorized.csv"
-        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/" + filename
-        self.categorized = categorized
+    def __init__(self, source_filename):
+        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/" + source_filename
 
     def seed(self):
         csv_data = self.load_csv(self.SEED_FILEPATH)
@@ -119,10 +117,12 @@ class TransactionSeeder(Seeder):
                 'original_description': row[4]
             }
 
-            if self.categorized:
+            # this means the data also has categories
+            if len(row) == 8:
                 entry_data['pretty_description'] = row[5]
-                entry_data['category'] = row[6]
-                entry_data['subcategory'] = row[7]
+                entry_data['category'] = Category.objects.get(name=row[6])
+                if row[7] != "":
+                    entry_data['subcategory'] = Subcategory.objects.get(name=row[7])
 
             transaction_form = TransactionForm(entry_data)
 

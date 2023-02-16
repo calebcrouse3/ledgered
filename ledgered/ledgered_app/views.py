@@ -7,6 +7,7 @@ from .models import Category, Description, Transaction, SeedRequest, Subcategory
 from django.views.generic import ListView, CreateView, UpdateView
 from bokeh.plotting import figure, show
 from bokeh.embed import components
+import os
 from time import sleep
 
 
@@ -132,41 +133,50 @@ def seeder(request):
     seeds = SeedRequest.objects.all()
     seeded = len(seeds) > 0
 
+    # posting a seed request for the first time
     if request.method == 'POST':
         form = SeedRequestForm(request.POST)
         if form.is_valid():
-            print(form['seed_type'].data)
-            if form['seed_type'].data == 'C':
-                seed_database(categorized=True)
-            elif form['seed_type'].data == 'U':
-                seed_database(categorized=False)
-            else:
-                print("seed type not known")
-
+            seed_database(
+                form['descriptions_filename'].data,
+                form['categories_filename'].data,
+                form['transactions_filename'].data
+            )
             seeded_obj = form.save(commit=False)
             seeded_obj.save()
             return redirect('ledgered_app:seeder')
+    # return a seed form to fill out with dynamically loaded filenames
     elif not seeded:
         form = SeedRequestForm()
-        context = {"form": form}
+        context = {
+            "form": form,
+            "descriptions": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/descriptions")],
+            "categories": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/categories")],
+            "transactions": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/transactions")]
+        }
         return render(request, 'ledgered_app/seed_request.html', context)
+
     else:
         # this control path will always have 1 seed object
-        seed_type = seeds[0].seed_type
-        return render(request, 'ledgered_app/seed_status.html', context={"seed_type": seed_type})
+        context = {
+            "descriptions_filename": seeds[0].descriptions_filename,
+            "categories_filename": seeds[0].categories_filename,
+            "transactions_filename": seeds[0].transactions_filename,
+        }
+        return render(request, 'ledgered_app/seed_status.html', context)
 
 
-def seed_database(categorized):
+def seed_database(description_filename, category_filename, transaction_filename):
     account_seeder = AccountSeeder()
     account_seeder.seed()
 
-    cat_seeder = CategorySeeder()
+    cat_seeder = CategorySeeder(category_filename)
     cat_seeder.seed()
 
-    descr_seeder = DescriptionSeeder()
+    descr_seeder = DescriptionSeeder(description_filename)
     descr_seeder.seed()
 
-    entries_seeder = TransactionSeeder(categorized)
+    entries_seeder = TransactionSeeder(transaction_filename)
     entries_seeder.seed()
 
 

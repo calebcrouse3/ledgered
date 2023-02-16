@@ -6,9 +6,29 @@
 
 <form action="{% url 'ledgered_app:seeder' %}" method='post'>
     {% csrf_token %}
-    {{ form.as_p }}
+
+    {{ form.name }}
+    <p>{{ form.descriptions_filename.name }}</p>
+    <select name="{{ form.descriptions_filename.name }}">
+    {% for option in descriptions %}
+      <option value="{{ option.1 }}">{{ option.0 }}</option>
+    {% endfor %}
+    </select>
+
+    <p>{{ form.categories_filename.name }}</p>
+    <select name="{{ form.categories_filename.name }}">
+    {% for option in categories %}
+      <option value="{{ option.1 }}">{{ option.0 }}</option>
+    {% endfor %}
+    </select>
+
+    <p>{{ form.transactions_filename.name }}</p>
+    <select name="{{ form.transactions_filename.name }}">
+    {% for option in transactions %}
+      <option value="{{ option.1 }}">{{ option.0 }}</option>
+    {% endfor %}
+    </select>
+
     <button name="submit">Seed</button>
 </form>
-
-
 {% endblock content %}
