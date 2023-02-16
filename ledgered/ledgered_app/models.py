@@ -13,6 +13,11 @@ PLUGINS = [
     ("F", "Fidelity")
 ]
 
+SEED_TYPES = [
+    ("U", "Uncategorized"),
+    ("C", "Categorized"),
+]
+
 
 class Account(models.Model):
     """A transaction category"""
@@ -105,7 +110,11 @@ class FileUpload(models.Model):
     file = models.FileField()
 
 
-class Seeded(models.Model):
+class SeedRequest(models.Model):
     """Simple boolean to indicate is a user has had their account seeded yet"""
-    seeded = models.BooleanField()
+    seed_type = models.CharField(
+        max_length=2,
+        choices=SEED_TYPES,
+        default="U",
+    )
     date_added = models.DateTimeField(auto_now_add=True)

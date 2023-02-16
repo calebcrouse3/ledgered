@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect
 
-from .seeder.seed import CategorySeeder, DescriptionSeeder, TransactionSeeder, AccountSeeder
+from .seeder.seed import CategorySeeder, DescriptionSeeder, TransactionSeeder, AccountSeeder, DescriptionForm
 from .upload_handler import handle_upload
-from .forms import FileUploadForm, SeededForm, TransactionForm
-from .models import Category, Description, Transaction, Seeded, Subcategory, Account
+from .forms import FileUploadForm, TransactionForm, SeedRequestForm
+from .models import Category, Description, Transaction, SeedRequest, Subcategory, Account
 from django.views.generic import ListView, CreateView, UpdateView
+from bokeh.plotting import figure, show
+from bokeh.embed import components
+from time import sleep
 
 
 # Create your views here.
@@ -93,28 +96,30 @@ def categorize_next_transaction(request):
 
     if request.method != 'POST':
         t.pretty_description = get_pretty_description(t.original_description)
-        form = TransactionForm(instance=t)
+        t_form = TransactionForm(instance=t)
+        d_form = DescriptionForm()
     else:
-        print(request.POST)
-        form = TransactionForm(instance=t, data=request.POST)
-        print("form created")
-        print(form.data)
-        if form.is_valid():
-            print("form is valid")
-            form.save()
-            return redirect('ledgered_app:categorize_next_transaction')
+        if 'submit_transaction' in request.POST:
+            t_form = TransactionForm(instance=t, data=request.POST)
+            if t_form.is_valid():
+                print("form is valid")
+                t_form.save()
+                return redirect('ledgered_app:categorize_next_transaction')
+            else:
+                print("form was invalid")
+                print(t_form.errors)
+                return render(request, 'ledgered_app/invalid_transaction_form.html', {'error': t_form.errors})
+
+        elif 'submit_description' in request.POST:
+            d_form = DescriptionForm(data=request.POST)
+            if d_form.is_valid():
+                d_form.save()
+                return redirect('ledgered_app:categorize_next_transaction')
         else:
-            print("form was invalid")
-            print(form.errors)
-            return render(request, 'ledgered_app/invalid_transaction_form.html', {'error': form.errors})
+            print("neither form was found")
 
-    context = {'transaction': t, 'form': form, "num_uncategorized": cat_data["num"]}
+    context = {'transaction': t, 't_form': t_form, 'd_form': d_form, "num_uncategorized": cat_data["num"]}
     return render(request, 'ledgered_app/categorize_next_transaction.html', context)
-
-
-def reports(request):
-    """Page to render ledger reports."""
-    return render(request, 'ledgered_app/reports.html')
 
 
 def manage(request):
@@ -123,30 +128,46 @@ def manage(request):
 
 
 def seeder(request):
-    """If not already called, this URL will populate the data base with category, entry, and description data"""
-    seeded = len(Seeded.objects.all()) > 0
+    # get status of seeded
+    seeds = SeedRequest.objects.all()
+    seeded = len(seeds) > 0
 
-    if not seeded:
-        account_seeder = AccountSeeder()
-        account_seeder.seed()
+    if request.method == 'POST':
+        form = SeedRequestForm(request.POST)
+        if form.is_valid():
+            print(form['seed_type'].data)
+            if form['seed_type'].data == 'C':
+                seed_database(categorized=True)
+            elif form['seed_type'].data == 'U':
+                seed_database(categorized=False)
+            else:
+                print("seed type not known")
 
-        cat_seeder = CategorySeeder()
-        cat_seeder.seed()
-
-        descr_seeder = DescriptionSeeder()
-        descr_seeder.seed()
-
-        entries_seeder = TransactionSeeder()
-        entries_seeder.seed()
-
-        seeded_form = SeededForm({"seeded": True})
-        if seeded_form.is_valid():
-            seeded_obj = seeded_form.save(commit=False)
+            seeded_obj = form.save(commit=False)
             seeded_obj.save()
+            return redirect('ledgered_app:seeder')
+    elif not seeded:
+        form = SeedRequestForm()
+        context = {"form": form}
+        return render(request, 'ledgered_app/seed_request.html', context)
+    else:
+        # this control path will always have 1 seed object
+        seed_type = seeds[0].seed_type
+        return render(request, 'ledgered_app/seed_status.html', context={"seed_type": seed_type})
 
-    context = {"seeded": seeded}
 
-    return render(request, 'ledgered_app/seeder.html', context)
+def seed_database(categorized):
+    account_seeder = AccountSeeder()
+    account_seeder.seed()
+
+    cat_seeder = CategorySeeder()
+    cat_seeder.seed()
+
+    descr_seeder = DescriptionSeeder()
+    descr_seeder.seed()
+
+    entries_seeder = TransactionSeeder(categorized)
+    entries_seeder.seed()
 
 
 def list_categories(request):
@@ -166,13 +187,25 @@ def list_categories(request):
     return render(request, 'ledgered_app/list_categories.html', context)
 
 
+def reports(request):
+    # Create a Bokeh figure
+    p = figure()
+    p.circle([1, 2, 3, 4, 5], [2, 5, 8, 2, 7])
+
+    # Generate the HTML and JavaScript code for the Bokeh visualization
+    script, div = components(p)
+
+    # Render the template with the Bokeh visualization embedded
+    return render(request, 'ledgered_app/reports.html', context={'script': script, 'div': div})
+
+
 def delete_all(request):
     """Page to manage user data."""
     Transaction.objects.all().delete()
     Category.objects.all().delete()
     Subcategory.objects.all().delete()
     Description.objects.all().delete()
-    Seeded.objects.all().delete()
+    SeedRequest.objects.all().delete()
     Account.objects.all().delete()
     return render(request, 'ledgered_app/delete_all.html')
 

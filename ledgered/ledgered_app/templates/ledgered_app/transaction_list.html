@@ -1,31 +1,43 @@
 {% extends "ledgered_app/base.html" %}
 
 {% block content %}
-<h1>Transactions</h1>
-<table>
-    <tr>
-      <td>Date</td>
-      <td>Account</td>
-      <td>Amount</td>
-      <td>Original_description</td>
-      <td>Pretty_description</td>
-      <td>Category</td>
-      <td>Sub_category</td>
-    </tr>
-    {% for t in object_list %}
-    <tr>
-      <td>{{ t.date }}</td>
-      <td>{{ t.account }}</td>
-      <td>{{ t.amount }}</td>
-      <td>{{ t.original_description }}</td>
-      <td>{{ t.pretty_description }}</td>
-      <td>{{ t.category }}</td>
-      <td>{{ t.subcategory }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td>No Transactions</td>
-    </tr>
-    {% endfor %}
-</table>
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simple_table.css' %}">
+</head>
+<body>
+    <h1>Transactions</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Account</th>
+          <th>Amount</th>
+          <th>Original Description</th>
+          <th>Pretty Description</th>
+          <th>Category</th>
+          <th>Subcategory</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in object_list %}
+          <tr>
+            <td>{{ t.date }}</td>
+            <td>{{ t.account }}</td>
+            <td>{{ t.amount }}</td>
+            <td>{{ t.original_description }}</td>
+            <td>{{ t.pretty_description }}</td>
+            <td>{{ t.category }}</td>
+            <td>{{ t.subcategory }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">No Transactions</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</body>
+</html>
 {% endblock content %}

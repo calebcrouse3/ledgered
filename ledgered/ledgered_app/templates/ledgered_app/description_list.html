@@ -1,23 +1,35 @@
 {% extends "ledgered_app/base.html" %}
 
 {% block content %}
-<h1>Descriptions</h1>
-<table>
-    <tr>
-      <td>Description</td>
-      <td>Predicate</td>
-      <td>Is_Identity</td>
-    </tr>
-    {% for d in object_list %}
-    <tr>
-      <td>{{ d.description }}</td>
-      <td>{{ d.predicate }}</td>
-      <td>{{ d.is_identity }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td>No Description</td>
-    </tr>
-    {% endfor %}
-</table>
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simple_table.css' %}">
+</head>
+<body>
+    <h1>Descriptions</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Predicate</th>
+          <th>Is Identity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in object_list %}
+        <tr>
+          <td>{{ d.description }}</td>
+          <td>{{ d.predicate }}</td>
+          <td>{{ d.is_identity }}</td>
+        </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">No Descriptions</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</body>
+</html>
 {% endblock content %}

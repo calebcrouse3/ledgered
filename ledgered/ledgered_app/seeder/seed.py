@@ -10,7 +10,7 @@ from ..forms import CategoryForm, SubcategoryForm, DescriptionForm, TransactionF
 from ..models import PLUGINS, Account
 
 
-class Seeder():
+class Seeder:
     """Seeds the database with data from a yaml or csv file"""
     
     def save_form(self, form):
@@ -101,8 +101,10 @@ class AccountSeeder(Seeder):
 
 
 class TransactionSeeder(Seeder):
-    def __init__(self):
-        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/test.csv"
+    def __init__(self, categorized):
+        filename = "test.csv" if not categorized else "test_categorized.csv"
+        self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/" + filename
+        self.categorized = categorized
 
     def seed(self):
         csv_data = self.load_csv(self.SEED_FILEPATH)
@@ -116,6 +118,11 @@ class TransactionSeeder(Seeder):
                 'account': Account.objects.get(name=row[3]),
                 'original_description': row[4]
             }
+
+            if self.categorized:
+                entry_data['pretty_description'] = row[5]
+                entry_data['category'] = row[6]
+                entry_data['subcategory'] = row[7]
 
             transaction_form = TransactionForm(entry_data)
 

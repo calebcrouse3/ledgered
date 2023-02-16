@@ -2,9 +2,8 @@
 track your expenses, in a ledger
 
 ### where you left off
-Fidelity file upload working
 
-Working on cascading drop downs. glitch where we can only submit a form on the second attempt. Maybe look for other tutorials
+Seeding with test data that already has category data not working.
 
 ### TODO List
 1. Find more graceful way to define and enforce the plugin types and transaction types (constants) and use them throughout
@@ -14,10 +13,8 @@ Working on cascading drop downs. glitch where we can only submit a form on the s
 4. Find better way to do more error handling during file upload process
 5. Figure out how to prevent data duplication for descriptions when seeding data
 6. Make account a db value
-7. Add test data for seeding with categorizes already filled
 
-- revisit enums being a single letter versus a whole word and just yeah whats up with enums
-- Make functionality to choose source of seeding data, either test data of default (caleb's) data
+- revisit enums being a single letter versus a whole word and just yeah what's up with enums
 
 #### more commands
 open django shell

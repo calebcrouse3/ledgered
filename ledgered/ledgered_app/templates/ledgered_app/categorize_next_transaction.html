@@ -3,16 +3,23 @@
 {% block content %}
 
     <h2>Remaining Transactions: {{ num_uncategorized }}</h2>
-
     <form
         action="{% url 'ledgered_app:categorize_next_transaction' %}"
         method='post'
         data-subcategories-url="{% url 'ledgered_app:ajax_load_subcategories' %}"
         id="transactionForm">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button name="submit">Save and Continue</button>
+        {{ t_form.as_p }}
+        <button name="submit_transaction">Save and Continue</button>
     </form>
+
+    <h2>Add New Description Rule</h2>
+    <form action="{% url 'ledgered_app:categorize_next_transaction' %}" method='post'>
+        {% csrf_token %}
+        {{ d_form.as_p }}
+        <button name="submit_description">Add New Description Rule</button>
+    </form>
+
     <a href="{% url 'ledgered_app:ledger' %}">Exit</a>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
