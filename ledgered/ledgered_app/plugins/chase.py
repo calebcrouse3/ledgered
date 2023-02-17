@@ -23,15 +23,15 @@ class ChasePlugin(Plugin):
             "memo"
         ]
 
-    def get_account_id(self):
-        return "C"
+    def get_account_name(self):
+        return "Chase"
 
     # date, type, amount, account, original_description
     def process_raw_transaction_df(self, df):
         processed_df = df.copy()
-        processed_df.rename(columns={"description": "original_description"}, inplace=True)
+        processed_df["original_description"] = processed_df["description"].astype("string")
         # -/+ amount is debit/credit
-        processed_df["type"] = processed_df["amount"].apply(lambda x: self.sign_to_type(x))
+        processed_df["type"] = processed_df["amount"].apply(lambda x: self.sign_to_type(x)).astype("string")
         processed_df["amount"] = processed_df["amount"].astype(float).apply(abs)
         processed_df["date"] = processed_df["transaction_date"].apply(lambda x: datetime.strptime(x, "%m/%d/%Y").date())
         return processed_df[["date", "type", "original_description", "amount"]]

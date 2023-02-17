@@ -1,7 +1,7 @@
 {% extends "ledgered_app/base.html" %}
 
 {% block content %}
-<p>Here you will upload files to be fed into the data base.</p>
+<p>Here you will upload files to be fed into the database.</p>
 
 <form action="{% url 'ledgered_app:upload' %}" method='post', enctype=multipart/form-data>
     {% csrf_token %}

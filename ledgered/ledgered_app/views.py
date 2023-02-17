@@ -129,10 +129,6 @@ def manage(request):
 
 
 def seeder(request):
-    # get status of seeded
-    seeds = SeedRequest.objects.all()
-    seeded = len(seeds) > 0
-
     # posting a seed request for the first time
     if request.method == 'POST':
         form = SeedRequestForm(request.POST)
@@ -145,25 +141,38 @@ def seeder(request):
             seeded_obj = form.save(commit=False)
             seeded_obj.save()
             return redirect('ledgered_app:seeder')
-    # return a seed form to fill out with dynamically loaded filenames
-    elif not seeded:
+    else:
         form = SeedRequestForm()
-        context = {
+        form_options = {
             "form": form,
-            "descriptions": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/descriptions")],
-            "categories": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/categories")],
-            "transactions": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/transactions")]
+            "descriptions": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/descriptions") + ["none"]],
+            "categories": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/categories") + ["none"]],
+            "transactions": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/transactions") + ["none"]]
         }
+        seed_status = get_seed_status()
+        context = {**seed_status, **form_options}
+        print(context)
         return render(request, 'ledgered_app/seed_request.html', context)
 
-    else:
-        # this control path will always have 1 seed object
-        context = {
-            "descriptions_filename": seeds[0].descriptions_filename,
-            "categories_filename": seeds[0].categories_filename,
-            "transactions_filename": seeds[0].transactions_filename,
+
+def get_seed_status():
+    seeds = SeedRequest.objects.all()
+    num_seeds = len(seeds)
+    if num_seeds > 0:
+        return {
+            "status_descriptions": ', '.join([x.descriptions_filename for x in seeds if x.descriptions_filename != "none"]),
+            "status_categories": ', '.join([x.categories_filename for x in seeds if x.categories_filename != "none"]),
+            "status_transactions": ', '.join([x.transactions_filename for x in seeds if x.transactions_filename != "none"]),
+            "status_num_seeds": num_seeds
         }
-        return render(request, 'ledgered_app/seed_status.html', context)
+    else:
+        # if no seeds yet just give empty strings
+        return {
+            "status_descriptions": "",
+            "status_categories": "",
+            "status_transactions": "",
+            "status_num_seeds": num_seeds
+        }
 
 
 def seed_database(description_filename, category_filename, transaction_filename):
@@ -226,3 +235,7 @@ class TransactionListView(ListView):
 
 class DescriptionListView(ListView):
     model = Description
+
+
+class AccountListView(ListView):
+    model = Account

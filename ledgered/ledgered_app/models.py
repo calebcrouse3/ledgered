@@ -3,29 +3,30 @@ import os
 from django.db import models
 
 TRANSACTION_TYPES = [
-    ("C", "Credit"),
-    ("D", "Debit")
+    ("Credit", "Credit"),
+    ("Debit", "Debit")
 ]
 
 # define plugin types
 PLUGINS = [
-    ("A", "Amazon"),
-    ("M", "Mint"),
-    ("C", "Chase"),
-    ("F", "Fidelity")
+    ("Amazon", "Amazon"),
+    ("Mint", "Mint"),
+    ("Chase", "Chase"),
+    ("Fidelity", "Fidelity")
 ]
 
 SEED_TYPES = [
-    ("U", "Uncategorized"),
-    ("C", "Categorized"),
+    ("Uncategorized", "Uncategorized"),
+    ("Categorized", "Categorized"),
 ]
+
 
 class Account(models.Model):
     """A transaction category"""
     name = models.CharField(
-        max_length=2,
+        max_length=100,
         choices=PLUGINS,
-        default="C"
+        default=PLUGINS[0][0]
     )
     date_added = models.DateTimeField(auto_now_add=True)
 
@@ -68,9 +69,9 @@ class Transaction(models.Model):
     """A transaction in your ledger"""
     date = models.DateField()
     type = models.CharField(
-        max_length=2,
+        max_length=100,
         choices=TRANSACTION_TYPES,
-        default="D",
+        default=TRANSACTION_TYPES[0][0],
     )
     amount = models.FloatField()
     account = models.ForeignKey(Account, on_delete=models.PROTECT)
@@ -104,9 +105,9 @@ class Description(models.Model):
 
 class FileUpload(models.Model):
     account_type = models.CharField(
-        max_length=2,
+        max_length=100,
         choices=PLUGINS,
-        default="C",
+        default=PLUGINS[0][0]
     )
     file = models.FileField()
 

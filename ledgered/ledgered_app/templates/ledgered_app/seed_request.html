@@ -2,7 +2,14 @@
 
 {% block content %}
 
-<p>Seed Request</p>
+<h1>Seed Status</h1>
+
+<p>Descriptions: {{ status_descriptions }}</p>
+<p>Categories: {{ status_categories }}</p>
+<p>Transactions: {{ status_transactions }}</p>
+<p>Num Seed Requests: {{ status_num_seeds }}</p>
+
+<h1>Seed Request</h1>
 
 <form action="{% url 'ledgered_app:seeder' %}" method='post'>
     {% csrf_token %}

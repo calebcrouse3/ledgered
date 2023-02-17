@@ -7,6 +7,7 @@ get_matching_transactions not finding matching transactions (maybe because it er
 Should account be a database option? Need to fix where we enter in uploaded transactions account value
 Account needs to be a database value and you can only upload accounts after adding the database value. Just use seed the database with all the accounts we have plugins for.
 Need to be able to seed description/categories/accounts different from transactions because we might want to get transactions through a raw upload
+Need to enforce that there's no duplicates in account names for each user. Or maybe even just globally.
 
 ### TODO List
 1. Find more graceful way to define and enforce the plugin types and transaction types (constants) and use them throughout
@@ -15,7 +16,16 @@ Need to be able to seed description/categories/accounts different from transacti
    4. Maybe do everything like by line and without pandas? Even the aggregation? Or maybe just do as little as possible with pandas
 4. Find better way to do more error handling during file upload process
 5. Figure out how to prevent data duplication for descriptions when seeding data
-6. Make account a db value
+6. Find somewhere to hard code the transaction fields which define a unique transaction (date, account, type, amount, original_description). Do we actually need to do this?
+7. make abbrevioations for long words
+   8. trxn - transaction
+   9. dscr - descrition
+   10. acct - account
+   11. cat - category
+   12. subcat - subcategory
+
+13. Make some upload tests
+    14. mostly with how to handle uploading new transactions
 
 - revisit enums being a single letter versus a whole word and just yeah what's up with enums
 
@@ -47,5 +57,19 @@ subcategory has a forgeign key as category which allows us to call "subcategory_
 ```
 c = Category.objects.get(id=90)
 c.subcategory_set.all()
+```
+
+
+Find transactions that match filter conditions
+```
+from ledgered_app.models import Transaction, Account
+import datetime
+
+Transaction.objects.filter(
+   #account__name="Chase",
+   type="Debit",
+   date=datetime.date(2023, 2, 14),
+   #original_description=form.data["original_description"],
+).count()
 ```
 

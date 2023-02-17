@@ -21,6 +21,7 @@ urlpatterns = [
     # for debugging
     path('transaction_list', views.TransactionListView.as_view(), name='transaction_list'),
     path('description_list', views.DescriptionListView.as_view(), name='description_list'),
+    path('account_list', views.AccountListView.as_view(), name='account_list'),
     path('delete_all', views.delete_all, name='delete_all'),
     path('categories_list', views.list_categories, name='categories_list')
 ]

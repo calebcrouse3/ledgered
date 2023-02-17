@@ -18,20 +18,20 @@ def handle_upload(file, account_type):
     plugin_types = get_plugin_types()
 
     # file is a mint transaction log
-    if account_type == "M" and "M" in plugin_types:
+    if account_type == "Mint" and "Mint" in plugin_types:
         mint = MintPlugin()
         return mint.process_file(file)  # returns dictionary of file processing results
 
     # file is a fidelity transaction log
-    if account_type == "F" and "F" in plugin_types:
+    if account_type == "Fidelity" and "Fidelity" in plugin_types:
         fidelity = FidelityPlugin()
         return fidelity.process_file(file)  # returns dictionary of file processing results
 
     # file is a fidelity transaction log
-    if account_type == "C" and "C" in plugin_types:
+    if account_type == "Chase" and "Chase" in plugin_types:
         chase = ChasePlugin()
         return chase.process_file(file)  # returns dictionary of file processing results
 
     # file is an amazon transaction log
-    elif account_type == "A" and "A" in plugin_types:
+    elif account_type == "Amazon" and "Amazon" in plugin_types:
         pass
