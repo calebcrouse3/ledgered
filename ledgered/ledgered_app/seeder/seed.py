@@ -57,7 +57,7 @@ class CategorySeeder(Seeder):
         values = self.load_yaml(self.SEED_FILEPATH)
 
         for category, subcategories in values.items():
-            cat_data = {"name": category}
+            cat_data = {"name": category.title()}
             cat_form = CategoryForm(cat_data)
             if cat_form.is_valid():
                 cat_obj = cat_form.save(commit=False)
@@ -65,7 +65,7 @@ class CategorySeeder(Seeder):
 
                 if cat_obj:
                     for subcat in subcategories:
-                        subcat_data = {"name": subcat}
+                        subcat_data = {"name": subcat.title()}
                         subcat_form = SubcategoryForm(subcat_data)
 
                         if subcat_form.is_valid():
@@ -88,13 +88,13 @@ class DescriptionSeeder(Seeder):
         for descr, params in values.items():
             descr_data = {
                     "is_identity": params["is_identity"],
-                    "description": descr
+                    "description": descr.title()
                 }
 
             if "predicate" in params.keys():
-                descr_data["predicate"] = params["predicate"]
+                descr_data["predicate"] = params["predicate"].title()
             else:
-                descr_data["predicate"] = descr
+                descr_data["predicate"] = None
 
             descr_form = DescriptionForm(descr_data)
 

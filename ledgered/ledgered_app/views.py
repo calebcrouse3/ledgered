@@ -100,7 +100,12 @@ def categorize_next_transaction(request):
     if request.method != 'POST':
         t.pretty_description = get_pretty_description(t.original_description)
         t_form = TransactionForm(instance=t)
-        d_form = DescriptionForm()
+        # if there's no description rule for this transaction,
+        # give them a head start by putting the original string in the description box
+        if not t.pretty_description:
+            d_form = DescriptionForm({"description": t.original_description.title()})
+        else:
+            d_form = DescriptionForm()
     else:
         if 'submit_transaction' in request.POST:
             t_form = TransactionForm(instance=t, data=request.POST)
