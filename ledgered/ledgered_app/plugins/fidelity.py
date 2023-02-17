@@ -11,6 +11,9 @@ class FidelityPlugin(Plugin):
     def __init__(self):
         super().__init__()
 
+    def get_account_name(self):
+        return "Fidelity"
+
     def get_input_schema(self):
         """Note: headers from file will be converted into snake case"""
         return [
@@ -21,10 +24,15 @@ class FidelityPlugin(Plugin):
             "amount"
         ]
 
-    def get_account_name(self):
-        return "Fidelity"
-
     def process_raw_transaction_df(self, df):
+        """Expected Output:
+        {
+            "date": "object",
+            "type": "string",
+            "amount": "float64",
+            "original_description": "string"
+        }
+        """
         processed_df = df.copy()
         processed_df.rename(columns={"transaction": "type", "name": "original_description"}, inplace=True)
         # get first letter from "CREDIT", "DEBIT" since that's what the transaction form accepts

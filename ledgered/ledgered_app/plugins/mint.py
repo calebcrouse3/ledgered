@@ -1,5 +1,3 @@
-from ..forms import TransactionForm
-from ..models import Transaction
 from .plugin import Plugin
 from datetime import datetime
 import pandas as pd
@@ -12,6 +10,9 @@ class MintPlugin(Plugin):
 
     def __init__(self):
         super().__init__()
+
+    def get_account_name(self):
+        return "Mint"
 
     def get_input_schema(self):
         """Note: headers from file will be converted into snake case"""
@@ -27,10 +28,13 @@ class MintPlugin(Plugin):
             "notes",
         ]
 
-    def get_account_name(self):
-        return "Mint"
-
     def process_raw_transaction_df(self, df):
-        df["amount"] = df["amount"].astype(float)
-        rollup_df = df.groupby(self.ROLLUP_KEYS, as_index=False).sum("amount")
-        return rollup_df
+        """Expected Output:
+        {
+            "date": "object",
+            "type": "string",
+            "amount": "float64",
+            "original_description": "string"
+        }
+        """
+        return df

@@ -11,6 +11,9 @@ class ChasePlugin(Plugin):
     def __init__(self):
         super().__init__()
 
+    def get_account_name(self):
+        return "Chase"
+
     def get_input_schema(self):
         """Note: headers from file will be converted into snake case"""
         return [
@@ -23,11 +26,15 @@ class ChasePlugin(Plugin):
             "memo"
         ]
 
-    def get_account_name(self):
-        return "Chase"
-
-    # date, type, amount, account, original_description
     def process_raw_transaction_df(self, df):
+        """Expected Output:
+        {
+            "date": "object",
+            "type": "string",
+            "amount": "float64",
+            "original_description": "string"
+        }
+        """
         processed_df = df.copy()
         processed_df["original_description"] = processed_df["description"].astype("string")
         # -/+ amount is debit/credit

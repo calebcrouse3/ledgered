@@ -24,13 +24,14 @@ def upload(request):
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
             file_upload = form.save(commit=False)
-            upload_summary=handle_upload(request.FILES['file'], file_upload.account_type)
+            upload_summary = handle_upload(request.FILES['file'], file_upload.account_type)
             return redirect(
                 f'ledgered_app:upload_success', 
                 new=upload_summary["new"], 
                 updated=upload_summary["updated"], 
-                duplicate=upload_summary["duplicate"], 
-                error=upload_summary["error"])
+                ignored=upload_summary["ignored"],
+                form_error=upload_summary["form_error"],
+                other_error=upload_summary["other_error"])
     else:
         form = FileUploadForm()
 
@@ -38,13 +39,14 @@ def upload(request):
     return render(request, 'ledgered_app/upload.html', context)
 
 
-def upload_success(request, new, updated, duplicate, error):
+def upload_success(request, new, updated, ignored, form_error, other_error):
     """Successful Upload"""
     context = {
         "new": new,
         "updated": updated,
-        "duplicate": duplicate,
-        "error": error
+        "ignored": ignored,
+        "form_error": form_error,
+        "other_error": other_error
     }
     return render(request, 'ledgered_app/upload_success.html', context=context)
 

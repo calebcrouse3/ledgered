@@ -1,6 +1,62 @@
 # ledgered
 track your expenses, in a ledger
 
+## Transaction Schema and File Uploads
+
+ledgered has a single unified transaction schema
+
+| Column               | Description                                                                     | From Source File | Nullable | Blank-able |
+|----------------------|---------------------------------------------------------------------------------|------------------|----------|------------|
+| date                 | The date of the transaction                                                     | T                |          |            |
+| account              | Which account this transaction corresponds to                                   | T                |          |            |
+| type                 | Debit - value subtracted from this account / Credit value added to this account | T                |          |            |
+| amount               | Amount of credit/debit. Always positive.                                        | T                |          |            |
+| original description | Raw description provided from upload                                            | T                |          |            |
+| pretty description   | Pretty description generated from description rule                              |                  | T        | T          |
+| category             | Primary category for this transaction                                           |                  | T        |            |
+| subcategory          | More detailed category for this transaction                                     |                  | T        | T          |
+
+Uploaded files from your accounts and banks are facilitated by a "plugin" (ex: chase, fidelity). A plugin defines the
+name of the account/plugin, the input schema, and a function that converts the uploaded data into the correct format.
+The parent plugin class defines all the other generic operations needed to convert a file upload into transactions
+which can be written into the database.
+
+The fields that unique define a transaction (not considered the pk's though) are:
+[date, account, type, amount, original_description]
+
+This basically means that if you had more than one of the same transaction in the same account from the same day that 
+we are going to only take the transaction with the highest value. We need a way to unique identify transactions so that
+when a user uploads another transaction file we don't accidentally duplicate transaction in the database. We only want
+to add new transactions to the database. Do we need to aggregate these values though? When would not aggregating mess
+us up? 
+
+If a transaction is updated with a new amount, like adding a tip.
+
+What does this buy us?
+
+What might go wrong here?
+
+The steps of processing an uploaded file using a plugin are roughly as follows.
+
+Steps:
+- receive upload form with account type and filename/contents
+  - account types are stored in database and correspond to enum in models.py
+- Instantiate the correct plugin class by reading the upload form account type
+- pass file contents (probably always .csv) to plugin.process_file()
+- check that file isn't too large
+- parse file headers and values into lists
+- verify that headers from file match the expected headers defined in the plugin
+- create a dataframe from file
+- call plugin subclass specific process_raw_df() to map raw df into master transaction schema
+- aggregate the processed df # gonna skip this for now!
+- verify the processed output df from the plugin subclass
+- For each transaction, determine if its already in the database, if not, add it!
+
+## The Ledger
+
+
+
+
 ### where you left off
 
 get_matching_transactions not finding matching transactions (maybe because it errors when it doesn't match?)
