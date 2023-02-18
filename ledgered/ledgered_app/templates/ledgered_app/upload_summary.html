@@ -1,0 +1,12 @@
+{% extends "ledgered_app/base.html" %}
+
+{% block content %}
+<p>
+    File processed successfully!<br>
+    {{summary.new}} new transaction added.<br>
+    {{summary.updated}} updated transaction.<br>
+    {{summary.ignored}} duplicate transaction ignored.<br>
+    {{summary.form_error}} form errors encountered.<br>
+    {{summary.other_error}} other errors encountered.
+</p>
+{% endblock content %}

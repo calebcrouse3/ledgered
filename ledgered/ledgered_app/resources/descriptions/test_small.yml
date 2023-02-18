@@ -1,10 +1,6 @@
 # short list of description rules for testing
-ironnet:
-  is_identity: True
-
-bfresh:
-  is_identity: True
-
-transfer:
-  is_identity: False
-  predicate: Payment Thank You - Web
+# description: predicate (can be null)
+description_rules:
+- ironnet:
+- bfresh:
+- transfer: payment thank you - web

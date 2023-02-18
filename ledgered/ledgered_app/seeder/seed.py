@@ -84,23 +84,19 @@ class DescriptionSeeder(Seeder):
             return None
 
         values = self.load_yaml(self.SEED_FILEPATH)
+        for rule in values["description_rules"]:
+            # should only be one key per dict but use this format anyway
+            for description, predicate in rule.items():
+                dscr_data = {
+                        "description": description.title(),
+                        "predicate": predicate
+                    }
 
-        for descr, params in values.items():
-            descr_data = {
-                    "is_identity": params["is_identity"],
-                    "description": descr.title()
-                }
+                dscr_form = DescriptionForm(dscr_data)
 
-            if "predicate" in params.keys():
-                descr_data["predicate"] = params["predicate"].title()
-            else:
-                descr_data["predicate"] = None
-
-            descr_form = DescriptionForm(descr_data)
-
-            if descr_form.is_valid():
-                descr_obj = descr_form.save(commit=False)
-                descr_obj.save()
+                if dscr_form.is_valid():
+                    descr_obj = dscr_form.save(commit=False)
+                    descr_obj.save()
 
 
 class AccountSeeder(Seeder):

@@ -54,8 +54,29 @@ Steps:
 
 ## The Ledger
 
+Go through transactions one by one where the objective is to give them a helpful pretty description and add a category
+and (optional) subcategory.
 
+### Pretty Descriptions
 
+Pretty descriptions cannot be entered manually, but they are not required. However, the ledger will attempt to use 
+previous pretty descriptions to find the appropriate category and subcategory for the current uncategorized transaction. 
+Pretty descriptions are applied to a transaction using description rules. There are two types of description rules: 
+Those with and without a predicate. For all description rules, the "description" field will be copied into the pretty 
+description if this description is a match. For predicate description rules, if the predicate is a substring of the 
+original description, the rule is a match. For rules without a predicate, the description is both the predicate and 
+description.
+
+The ledger will first look through all rules with a custom predicate and return that if its found. If no match is found
+then it will look through all the rules without a custom predicate.
+
+### Guessing Categories and Subcategories
+
+For each new transaction, if there is a matching description rule (and thus a pretty description for this transaction),
+then the ledger will look in the database for a previously ledgered transaction with this pretty description and 
+use the category and subcategory of the previous transaction for the current transaction.
+
+# DEV
 
 ### where you left off
 

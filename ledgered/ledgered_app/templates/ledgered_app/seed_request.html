@@ -1,41 +1,67 @@
 {% extends "ledgered_app/base.html" %}
 
 {% block content %}
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simple_table.css' %}">
+</head>
+<body>
+    <h1>Previous Seeds</h1>
 
-<h1>Seed Status</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Descriptions</th>
+          <th>Categories</th>
+          <th>Transactions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in seeds %}
+        <tr>
+          <td>{{ d.descriptions_filename }}</td>
+          <td>{{ d.categories_filename }}</td>
+          <td>{{ d.transactions_filename }}</td>
+        </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">No seeds yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
-<p>Descriptions: {{ status_descriptions }}</p>
-<p>Categories: {{ status_categories }}</p>
-<p>Transactions: {{ status_transactions }}</p>
-<p>Num Seed Requests: {{ status_num_seeds }}</p>
+    <h1>Seed Request</h1>
 
-<h1>Seed Request</h1>
+        <form action="{% url 'ledgered_app:seeder' %}" method='post'>
+            {% csrf_token %}
 
-<form action="{% url 'ledgered_app:seeder' %}" method='post'>
-    {% csrf_token %}
+            {{ form.name }}
+            <p>{{ form.descriptions_filename.name }}</p>
+            <select name="{{ form.descriptions_filename.name }}">
+            {% for option in descriptions %}
+              <option value="{{ option.1 }}">{{ option.0 }}</option>
+            {% endfor %}
+            </select>
 
-    {{ form.name }}
-    <p>{{ form.descriptions_filename.name }}</p>
-    <select name="{{ form.descriptions_filename.name }}">
-    {% for option in descriptions %}
-      <option value="{{ option.1 }}">{{ option.0 }}</option>
-    {% endfor %}
-    </select>
+            <p>{{ form.categories_filename.name }}</p>
+            <select name="{{ form.categories_filename.name }}">
+            {% for option in categories %}
+              <option value="{{ option.1 }}">{{ option.0 }}</option>
+            {% endfor %}
+            </select>
 
-    <p>{{ form.categories_filename.name }}</p>
-    <select name="{{ form.categories_filename.name }}">
-    {% for option in categories %}
-      <option value="{{ option.1 }}">{{ option.0 }}</option>
-    {% endfor %}
-    </select>
+            <p>{{ form.transactions_filename.name }}</p>
+            <select name="{{ form.transactions_filename.name }}">
+            {% for option in transactions %}
+              <option value="{{ option.1 }}">{{ option.0 }}</option>
+            {% endfor %}
+            </select>
 
-    <p>{{ form.transactions_filename.name }}</p>
-    <select name="{{ form.transactions_filename.name }}">
-    {% for option in transactions %}
-      <option value="{{ option.1 }}">{{ option.0 }}</option>
-    {% endfor %}
-    </select>
+            <button name="submit">Seed</button>
+        </form>
 
-    <button name="submit">Seed</button>
-</form>
+    </body>
+</html>
 {% endblock content %}

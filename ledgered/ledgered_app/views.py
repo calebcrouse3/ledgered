@@ -4,16 +4,14 @@ from .seeder.seed import CategorySeeder, DescriptionSeeder, TransactionSeeder, A
 from .upload_handler import handle_upload
 from .forms import FileUploadForm, TransactionForm, SeedRequestForm
 from .models import Category, Description, Transaction, SeedRequest, Subcategory, Account
-from django.views.generic import ListView, CreateView, UpdateView
-from bokeh.plotting import figure, show
+from .config import RESOURCE_PATH
+from django.views.generic import ListView
+from bokeh.plotting import figure
 from bokeh.embed import components
 import os
-from time import sleep
 
 
-# Create your views here.
 def index(request):
-    """The index page for setlist tracker."""
     return render(request, 'ledgered_app/index.html')
 
 
@@ -24,14 +22,8 @@ def upload(request):
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
             file_upload = form.save(commit=False)
-            upload_summary = handle_upload(request.FILES['file'], file_upload.account_type)
-            return redirect(
-                f'ledgered_app:upload_success', 
-                new=upload_summary["new"], 
-                updated=upload_summary["updated"], 
-                ignored=upload_summary["ignored"],
-                form_error=upload_summary["form_error"],
-                other_error=upload_summary["other_error"])
+            summary = handle_upload(request.FILES['file'], file_upload.account_type)
+            return render(request, 'ledgered_app/upload_summary.html', context={"summary": summary})
     else:
         form = FileUploadForm()
 
@@ -39,94 +31,104 @@ def upload(request):
     return render(request, 'ledgered_app/upload.html', context)
 
 
-def upload_success(request, new, updated, ignored, form_error, other_error):
-    """Successful Upload"""
-    context = {
-        "new": new,
-        "updated": updated,
-        "ignored": ignored,
-        "form_error": form_error,
-        "other_error": other_error
-    }
-    return render(request, 'ledgered_app/upload_success.html', context=context)
-
-
 def ledger(request):
     """Entry point for categorizing new transactions."""
-    cat_data = get_cat_data()
-    context = {
-        "num_uncategorized": cat_data["num"],
-    }
+    context = {"num_uncategorized": get_num_uncategorized_transactions()}
     return render(request, 'ledgered_app/ledger.html', context)
 
 
 def load_subcategories(request):
     category_id = request.GET.get('category')
     subcategories = Subcategory.objects.filter(category_id=category_id).order_by('name')
-    return render(request, 'ledgered_app/subcategory_dropdown_list_options.html', {'subcategories': subcategories})
+    return render(request, 'ledgered_app/subcategory_options.html', {'subcategories': subcategories})
 
 
-def get_cat_data():
-    t = Transaction.objects.filter(category=None)
-    data = {"num": len(t), "next": None}
-    if data["num"] > 0:
-        data["next"] = t[0]
-    return data
+def get_num_uncategorized_transactions():
+    return Transaction.objects.filter(category=None).count()
+
+
+def get_next_uncategorized_transaction():
+    # returns none if transaction doesnt exist
+    return Transaction.objects.filter(category=None).first()
 
 
 def get_pretty_description(original_description):
-    # first check for predicate rules
-    # TODO i forget why you might want a predicate rule or how they work so skip for now
-    # then check for identity rules
-    # this is gonna be inefficient because it has to load all the rules each time
-    # todo need to go back to a little more smart rule adding but for now its just going to return
-    # the first rule description that matches any predicate
-    # something about using the rule that matches to the longest predicate?
-    for rule in Description.objects.all():
-        if rule.predicate.lower() in original_description.lower():
+    """Uses description rules to find a matching pretty description for this original description
+    First looks through all the predicate rules and returns one of those if there's a match.
+    Then look for any matching description rules without a predicate and return the match with the longest
+    length.
+    """
+    for predicate_rule in Description.objects.filter(predicate__isnull=False):
+        if predicate_rule.predicate.lower() in original_description.lower():
+            return predicate_rule.description
+
+    for rule in Description.objects.filter(predicate__isnull=True):
+        if rule.description.lower() in original_description.lower():
             return rule.description
+
     return None
+
+
+def get_prev_transaction(pretty_description):
+    """Use the categories and subcategories of previous transactions to lookup category and subcategory
+    TODO could check if theres multiple different cats and subcats and maybe you want to do something different
+    """
+    return Transaction.objects.filter(pretty_description=pretty_description, category__isnull=False).first()
 
 
 def categorize_next_transaction(request):
     """Edit the category and subcategory of a transaction."""
-    cat_data = get_cat_data()
-    t = cat_data["next"]
+    num_uncategorized = get_num_uncategorized_transactions()
 
     # if no remaining transactions go back to ledger landing page
-    if cat_data["num"] == 0:
+    if num_uncategorized == 0:
         return redirect('ledgered_app:ledger')
 
+    next_trxn = get_next_uncategorized_transaction()
+
     if request.method != 'POST':
-        t.pretty_description = get_pretty_description(t.original_description)
-        t_form = TransactionForm(instance=t)
+        pretty_dscr = get_pretty_description(next_trxn.original_description)
+
+        if pretty_dscr:
+            next_trxn.pretty_description = pretty_dscr
+
+            # use pretty description to lookup subcategory
+            prev_trxn = get_prev_transaction(pretty_dscr)
+            if prev_trxn:
+                next_trxn.category = prev_trxn.category
+                next_trxn.subcategory = prev_trxn.subcategory
+
+        trxn_form = TransactionForm(instance=next_trxn)
+
         # if there's no description rule for this transaction,
         # give them a head start by putting the original string in the description box
-        if not t.pretty_description:
-            d_form = DescriptionForm({"description": t.original_description.title()})
+        if not next_trxn.pretty_description:
+            dscr_form = DescriptionForm({"description": next_trxn.original_description.title()})
         else:
-            d_form = DescriptionForm()
+            dscr_form = DescriptionForm()
+
     else:
         if 'submit_transaction' in request.POST:
-            t_form = TransactionForm(instance=t, data=request.POST)
-            if t_form.is_valid():
-                print("form is valid")
-                t_form.save()
+            trxn_form = TransactionForm(instance=next_trxn, data=request.POST)
+            if trxn_form.is_valid():
+                trxn_form.save()
                 return redirect('ledgered_app:categorize_next_transaction')
             else:
-                print("form was invalid")
-                print(t_form.errors)
-                return render(request, 'ledgered_app/invalid_transaction_form.html', {'error': t_form.errors})
+                print("Form Errors:\n", trxn_form.errors)
+                return render(request, 'ledgered_app/invalid_transaction_form.html', {'error': trxn_form.errors})
 
         elif 'submit_description' in request.POST:
-            d_form = DescriptionForm(data=request.POST)
-            if d_form.is_valid():
-                d_form.save()
+            dscr_form = DescriptionForm(data=request.POST)
+            if dscr_form.is_valid():
+                dscr_form.save()
                 return redirect('ledgered_app:categorize_next_transaction')
-        else:
-            print("neither form was found")
 
-    context = {'transaction': t, 't_form': t_form, 'd_form': d_form, "num_uncategorized": cat_data["num"]}
+    context = {
+        'trxn_form': trxn_form,
+        'dscr_form': dscr_form,
+        "num_uncategorized": num_uncategorized
+    }
+
     return render(request, 'ledgered_app/categorize_next_transaction.html', context)
 
 
@@ -149,59 +151,36 @@ def seeder(request):
             seeded_obj.save()
             return redirect('ledgered_app:seeder')
     else:
+        def filename_options(folder):
+            return [(f, f) for f in os.listdir(RESOURCE_PATH + folder) + ["none"]]
+
+        seeds = SeedRequest.objects.all()
         form = SeedRequestForm()
-        form_options = {
+        context = {
             "form": form,
-            "descriptions": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/descriptions") + ["none"]],
-            "categories": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/categories") + ["none"]],
-            "transactions": [(f, f) for f in os.listdir(os.getcwd()+"/ledgered_app/resources/transactions") + ["none"]]
+            "descriptions": filename_options("descriptions"),
+            "categories": filename_options("categories"),
+            "transactions": filename_options("transactions"),
+            "num_seeds": seeds.count(),
+            "seeds": seeds
         }
-        seed_status = get_seed_status()
-        context = {**seed_status, **form_options}
-        print(context)
         return render(request, 'ledgered_app/seed_request.html', context)
-
-
-def get_seed_status():
-    seeds = SeedRequest.objects.all()
-    num_seeds = len(seeds)
-    if num_seeds > 0:
-        return {
-            "status_descriptions": ', '.join([x.descriptions_filename for x in seeds if x.descriptions_filename != "none"]),
-            "status_categories": ', '.join([x.categories_filename for x in seeds if x.categories_filename != "none"]),
-            "status_transactions": ', '.join([x.transactions_filename for x in seeds if x.transactions_filename != "none"]),
-            "status_num_seeds": num_seeds
-        }
-    else:
-        # if no seeds yet just give empty strings
-        return {
-            "status_descriptions": "",
-            "status_categories": "",
-            "status_transactions": "",
-            "status_num_seeds": num_seeds
-        }
 
 
 def seed_database(description_filename, category_filename, transaction_filename):
     account_seeder = AccountSeeder()
-    account_seeder.seed()
-
     cat_seeder = CategorySeeder(category_filename)
-    cat_seeder.seed()
-
     descr_seeder = DescriptionSeeder(description_filename)
-    descr_seeder.seed()
-
     entries_seeder = TransactionSeeder(transaction_filename)
+    account_seeder.seed()
+    cat_seeder.seed()
+    descr_seeder.seed()
     entries_seeder.seed()
 
 
 def list_categories(request):
     """Print all categories in data base"""
-
-    # dict where key is cat name and value is list of subcats 
     cats_subcats = {}
-
     categories = Category.objects.order_by('name')
     for cat in categories:
         # get subcategories for each category
@@ -214,6 +193,8 @@ def list_categories(request):
 
 
 def reports(request):
+    """This is just a toy function. Replace with real plot later"""
+
     # Create a Bokeh figure
     p = figure()
     p.circle([1, 2, 3, 4, 5], [2, 5, 8, 2, 7])
@@ -226,13 +207,9 @@ def reports(request):
 
 
 def delete_all(request):
-    """Page to manage user data."""
-    Transaction.objects.all().delete()
-    Category.objects.all().delete()
-    Subcategory.objects.all().delete()
-    Description.objects.all().delete()
-    SeedRequest.objects.all().delete()
-    Account.objects.all().delete()
+    for model in [Transaction, Category, Subcategory, Description, SeedRequest, Account]:
+        model.objects.all().delete()
+
     return render(request, 'ledgered_app/delete_all.html')
 
 

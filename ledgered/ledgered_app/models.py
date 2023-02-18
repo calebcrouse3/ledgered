@@ -63,7 +63,15 @@ class Transaction(models.Model):
     subcategory = models.ForeignKey(Subcategory, on_delete=models.SET_NULL, null=True, default=None, blank=True)
 
     def __str__(self):
-        return f"{self.original_description}: {self.amount}"
+        return f"""
+            {self.date}
+            {self.type}
+            {self.account}
+            {self.amount}
+            {self.original_description}
+            {self.pretty_description}
+            {self.category}
+            {self.subcategory}"""
 
 
 class Description(models.Model):
@@ -71,10 +79,10 @@ class Description(models.Model):
     a transactions and is used to guess the correct category
     and sub_category for a transaction
     """
-    is_identity = models.BooleanField()
     description = models.CharField(max_length=200)
     predicate = models.CharField(max_length=200, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)
+    # TODO could make category and sub category a FK for faster lookup?
 
     def __str__(self):
         return f"{self.predicate}, {self.description}"
