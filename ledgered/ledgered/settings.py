@@ -34,8 +34,6 @@ INSTALLED_APPS = [
     # my apps
     'ledgered_app',
 
-    # third part apps
-
     # default apps
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # third part apps
+    'django_bootstrap5'
 ]
 
 MIDDLEWARE = [
@@ -60,7 +61,7 @@ ROOT_URLCONF = 'ledgered.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [],  # used to be []
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
