@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 TRANSACTION_TYPES = [
     ("Credit", "Credit"),
@@ -26,6 +27,7 @@ class Account(models.Model):
 
 
 class Category(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)
 
@@ -38,14 +40,12 @@ class Subcategory(models.Model):
     name = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        verbose_name_plural = 'subcategories'
-
     def __str__(self):
         return f"{self.name}"
 
 
 class Transaction(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField()
     type = models.CharField(
         max_length=100,
@@ -79,6 +79,7 @@ class Description(models.Model):
     a transactions and is used to guess the correct category
     and sub_category for a transaction
     """
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=200)
     predicate = models.CharField(max_length=200, null=True, blank=True)
     date_added = models.DateTimeField(auto_now_add=True)

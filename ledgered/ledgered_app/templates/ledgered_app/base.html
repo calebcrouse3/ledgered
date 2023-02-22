@@ -1,15 +1,23 @@
 <p>
-    <a href="{% url 'ledgered_app:index' %}">Home</a> -
-    <a href="{% url 'ledgered_app:upload' %}">Upload</a> -
-    <a href="{% url 'ledgered_app:ledger' %}">Ledger</a> -
-    <a href="{% url 'ledgered_app:reports' %}">Reports</a> -
-    <a href="{% url 'ledgered_app:manage' %}">Manage</a> -
-    <a href="{% url 'ledgered_app:seeder' %}">Seeder</a> -
-    <a href="{% url 'ledgered_app:categories_list' %}">categories_list</a> -
-    <a href="{% url 'ledgered_app:description_list' %}">description_list</a> -
-    <a href="{% url 'ledgered_app:transaction_list' %}">transaction_list</a> -
-    <a href="{% url 'ledgered_app:account_list' %}">account_list</a> -
-    <a href="{% url 'ledgered_app:delete_all' %}">delete_all</a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'ledgered_app:index' %}">Home</a> -
+        <a href="{% url 'ledgered_app:upload' %}">Upload</a> -
+        <a href="{% url 'ledgered_app:ledger' %}">Ledger</a> -
+        <a href="{% url 'ledgered_app:reports' %}">Reports</a> -
+        <a href="{% url 'ledgered_app:manage' %}">Manage</a> -
+        <a href="{% url 'ledgered_app:seeder' %}">Seeder</a> -
+        <a href="{% url 'ledgered_app:categories_list' %}">categories_list</a> -
+        <a href="{% url 'ledgered_app:description_list' %}">description_list</a> -
+        <a href="{% url 'ledgered_app:transaction_list' %}">transaction_list</a> -
+        <a href="{% url 'ledgered_app:account_list' %}">account_list</a> -
+        <a href="{% url 'ledgered_app:delete_all' %}">delete_all</a>
+        <hr />
+        Hello, {{ user.username }} -
+        <a href="{% url 'accounts:logout' %}">Log Out</a>
+    {% else %}
+        <a href="{% url 'accounts:login' %}">Log in</a> -
+        <a href="{% url 'accounts:register' %}">Register</a>
+    {% endif %}
 </p>
 
 {% block content %}{% endblock content %}

@@ -46,9 +46,10 @@ class Seeder:
 class CategorySeeder(Seeder):
     """Seed the database with the categories"""
 
-    def __init__(self, source_filename):
+    def __init__(self, source_filename, user):
         self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/categories/" + source_filename
         self.RUN_SEED = self.set_run_seed(source_filename)
+        self.USER = user
 
     def seed(self):
         if not self.RUN_SEED:
@@ -57,7 +58,10 @@ class CategorySeeder(Seeder):
         values = self.load_yaml(self.SEED_FILEPATH)
 
         for category, subcategories in values.items():
-            cat_data = {"name": category.title()}
+            cat_data = {
+                "owner": self.USER,
+                "name": category.title()
+            }
             cat_form = CategoryForm(cat_data)
             if cat_form.is_valid():
                 cat_obj = cat_form.save(commit=False)
@@ -65,7 +69,9 @@ class CategorySeeder(Seeder):
 
                 if cat_obj:
                     for subcat in subcategories:
-                        subcat_data = {"name": subcat.title()}
+                        subcat_data = {
+                            "name": subcat.title()
+                        }
                         subcat_form = SubcategoryForm(subcat_data)
 
                         if subcat_form.is_valid():
@@ -75,9 +81,10 @@ class CategorySeeder(Seeder):
 
 
 class DescriptionSeeder(Seeder):
-    def __init__(self, source_filename):
+    def __init__(self, source_filename, user):
         self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/descriptions/" + source_filename
         self.RUN_SEED = self.set_run_seed(source_filename)
+        self.USER = user
 
     def seed(self):
         if not self.RUN_SEED:
@@ -88,6 +95,7 @@ class DescriptionSeeder(Seeder):
             # should only be one key per dict but use this format anyway
             for description, predicate in rule.items():
                 dscr_data = {
+                        "owner": self.USER,
                         "description": description.title(),
                         "predicate": predicate
                     }
@@ -111,9 +119,10 @@ class AccountSeeder(Seeder):
 
 
 class TransactionSeeder(Seeder):
-    def __init__(self, source_filename):
+    def __init__(self, source_filename, user):
         self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/transactions/" + source_filename
         self.RUN_SEED = self.set_run_seed(source_filename)
+        self.USER = user
 
     def seed(self):
         if not self.RUN_SEED:
@@ -124,6 +133,7 @@ class TransactionSeeder(Seeder):
         for row in csv_data:
 
             entry_data = {
+                'owner': self.USER,
                 'date': row[0],
                 'type': row[1],
                 'amount': row[2],

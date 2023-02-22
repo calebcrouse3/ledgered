@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 
 from .seeder.seed import CategorySeeder, DescriptionSeeder, TransactionSeeder, AccountSeeder, DescriptionForm
@@ -6,6 +7,7 @@ from .forms import FileUploadForm, TransactionForm, SeedRequestForm
 from .models import Category, Description, Transaction, SeedRequest, Subcategory, Account
 from .config import RESOURCE_PATH
 from django.views.generic import ListView
+from django.contrib.auth.decorators import login_required
 from bokeh.plotting import figure
 from bokeh.embed import components
 import os
@@ -15,6 +17,7 @@ def index(request):
     return render(request, 'ledgered_app/index.html')
 
 
+@login_required
 def upload(request):
     """Page to upload transaction files."""
 
@@ -22,7 +25,7 @@ def upload(request):
         form = FileUploadForm(request.POST, request.FILES)
         if form.is_valid():
             file_upload = form.save(commit=False)
-            summary = handle_upload(request.FILES['file'], file_upload.account_type)
+            summary = handle_upload(request.FILES['file'], file_upload.account_type, request.user)
             return render(request, 'ledgered_app/upload_summary.html', context={"summary": summary})
     else:
         form = FileUploadForm()
@@ -31,69 +34,72 @@ def upload(request):
     return render(request, 'ledgered_app/upload.html', context)
 
 
+@login_required
 def ledger(request):
     """Entry point for categorizing new transactions."""
-    context = {"num_uncategorized": get_num_uncategorized_transactions()}
+    context = {"num_uncategorized": get_num_uncategorized_transactions(request.user)}
     return render(request, 'ledgered_app/ledger.html', context)
 
 
+@login_required
 def load_subcategories(request):
     category_id = request.GET.get('category')
     subcategories = Subcategory.objects.filter(category_id=category_id).order_by('name')
     return render(request, 'ledgered_app/subcategory_options.html', {'subcategories': subcategories})
 
 
-def get_num_uncategorized_transactions():
-    return Transaction.objects.filter(category=None).count()
+def get_num_uncategorized_transactions(user):
+    return Transaction.objects.filter(category=None, owner=user).count()
 
 
-def get_next_uncategorized_transaction():
+def get_next_uncategorized_transaction(user):
     # returns none if transaction doesnt exist
-    return Transaction.objects.filter(category=None).first()
+    return Transaction.objects.filter(category=None, owner=user).first()
 
 
-def get_pretty_description(original_description):
+def get_pretty_description(original_description, user):
     """Uses description rules to find a matching pretty description for this original description
     First looks through all the predicate rules and returns one of those if there's a match.
     Then look for any matching description rules without a predicate and return the match with the longest
     length.
     """
-    for predicate_rule in Description.objects.filter(predicate__isnull=False):
+    for predicate_rule in Description.objects.filter(predicate__isnull=False, owner=user):
         if predicate_rule.predicate.lower() in original_description.lower():
             return predicate_rule.description
 
-    for rule in Description.objects.filter(predicate__isnull=True):
+    for rule in Description.objects.filter(predicate__isnull=True, owner=user):
         if rule.description.lower() in original_description.lower():
             return rule.description
 
     return None
 
 
-def get_prev_transaction(pretty_description):
+def get_prev_transaction(pretty_description, user):
     """Use the categories and subcategories of previous transactions to lookup category and subcategory
     TODO could check if theres multiple different cats and subcats and maybe you want to do something different
     """
-    return Transaction.objects.filter(pretty_description=pretty_description, category__isnull=False).first()
+    return Transaction.objects.filter(owner=user, pretty_description=pretty_description, category__isnull=False).first()
 
 
+@login_required
 def categorize_next_transaction(request):
     """Edit the category and subcategory of a transaction."""
-    num_uncategorized = get_num_uncategorized_transactions()
+    num_uncategorized = get_num_uncategorized_transactions(request.user)
 
     # if no remaining transactions go back to ledger landing page
     if num_uncategorized == 0:
         return redirect('ledgered_app:ledger')
 
-    next_trxn = get_next_uncategorized_transaction()
+    next_trxn = get_next_uncategorized_transaction(request.user)
 
     if request.method != 'POST':
-        pretty_dscr = get_pretty_description(next_trxn.original_description)
+        pretty_dscr = get_pretty_description(next_trxn.original_description, request.user)
 
         if pretty_dscr:
             next_trxn.pretty_description = pretty_dscr
 
             # use pretty description to lookup subcategory
-            prev_trxn = get_prev_transaction(pretty_dscr)
+            prev_trxn = get_prev_transaction(pretty_dscr, request.user)
             if prev_trxn:
                 next_trxn.category = prev_trxn.category
                 next_trxn.subcategory = prev_trxn.subcategory
@@ -132,11 +138,13 @@ def categorize_next_transaction(request):
     return render(request, 'ledgered_app/categorize_next_transaction.html', context)
 
 
+@login_required
 def manage(request):
     """Page to manage user data."""
     return render(request, 'ledgered_app/manage.html')
 
 
+@login_required
 def seeder(request):
     # posting a seed request for the first time
     if request.method == 'POST':
@@ -145,7 +153,8 @@ def seeder(request):
             seed_database(
                 form['descriptions_filename'].data,
                 form['categories_filename'].data,
-                form['transactions_filename'].data
+                form['transactions_filename'].data,
+                request.user
             )
             seeded_obj = form.save(commit=False)
             seeded_obj.save()
@@ -167,21 +176,22 @@ def seeder(request):
         return render(request, 'ledgered_app/seed_request.html', context)
 
 
-def seed_database(description_filename, category_filename, transaction_filename):
+def seed_database(description_filename, category_filename, transaction_filename, user):
     account_seeder = AccountSeeder()
-    cat_seeder = CategorySeeder(category_filename)
-    descr_seeder = DescriptionSeeder(description_filename)
-    entries_seeder = TransactionSeeder(transaction_filename)
+    cat_seeder = CategorySeeder(category_filename, user)
+    descr_seeder = DescriptionSeeder(description_filename, user)
+    entries_seeder = TransactionSeeder(transaction_filename, user)
     account_seeder.seed()
     cat_seeder.seed()
     descr_seeder.seed()
     entries_seeder.seed()
 
 
+@login_required
 def list_categories(request):
     """Print all categories in data base"""
     cats_subcats = {}
-    categories = Category.objects.order_by('name')
+    categories = Category.objects.filter(owner=request.user).order_by('name')
     for cat in categories:
         # get subcategories for each category
         subcategories = Category.objects.get(id=cat.id).subcategory_set.order_by('name')
@@ -192,6 +202,7 @@ def list_categories(request):
     return render(request, 'ledgered_app/list_categories.html', context)
 
 
+@login_required
 def reports(request):
     """This is just a toy function. Replace with real plot later"""
 
@@ -206,6 +217,7 @@ def reports(request):
     return render(request, 'ledgered_app/reports.html', context={'script': script, 'div': div})
 
 
+@login_required
 def delete_all(request):
     for model in [Transaction, Category, Subcategory, Description, SeedRequest, Account]:
         model.objects.all().delete()
@@ -216,9 +228,19 @@ def delete_all(request):
 class TransactionListView(ListView):
     model = Transaction
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(owner=self.request.user)
+        return queryset
+
 
 class DescriptionListView(ListView):
     model = Description
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(owner=self.request.user)
+        return queryset
 
 
 class AccountListView(ListView):

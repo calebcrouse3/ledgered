@@ -14,7 +14,7 @@ OTHER_ERROR = "other_error"
 
 
 class Plugin:
-    def __init__(self):
+    def __init__(self, user):
         self.INPUT_SCHEMA = self.get_input_schema()
         self.ACCOUNT_NAME = self.get_account_name()
 
@@ -25,6 +25,8 @@ class Plugin:
             "amount": "float64",
             "original_description": "string"
         }
+
+        self.USER = user
 
     """
     Abstract methods
@@ -79,20 +81,22 @@ class Plugin:
         """Return any transactions already in the database that match this form"""
 
         count = Transaction.objects.filter(
+            owner=self.USER,
             date=form.data["date"],
             type=form.data["type"],
             account__name__exact=form.data["account"].name,
-            original_description=form.data["original_description"],
+            original_description=form.data["original_description"]
         ).count()
 
         if count > 1:
             raise ValueError("there were more than one transactions in the database matching this filter conditions")
         elif count == 1:
             match = Transaction.objects.get(
+                owner=self.USER,
                 date=form.data["date"],
                 type=form.data["type"],
                 account__name__exact=form.data["account"].name,
-                original_description=form.data["original_description"],
+                original_description=form.data["original_description"]
             )
             return match
         else:
@@ -110,6 +114,7 @@ class Plugin:
         """Takes a row from df and determines what to do with it."""
 
         form_data = {
+            'owner': self.USER,
             "date": row["date"],
             "type": row["type"],
             "amount": round(row["amount"], 2),

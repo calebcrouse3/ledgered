@@ -33,6 +33,10 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     # my apps
     'ledgered_app',
+    'accounts',
+
+    # third part apps
+    'django_bootstrap5',
 
     # default apps
     'django.contrib.admin',
@@ -40,10 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-
-    # third part apps
-    'django_bootstrap5'
+    'django.contrib.staticfiles'
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,7 @@ ROOT_URLCONF = 'ledgered.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # used to be []
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -159,3 +160,8 @@ LOGGING = {
         },
     }
 }
+
+# My settings.
+LOGIN_REDIRECT_URL = 'ledgered_app:index'
+LOGOUT_REDIRECT_URL = 'ledgered_app:index'
+LOGIN_URL = 'accounts:login'

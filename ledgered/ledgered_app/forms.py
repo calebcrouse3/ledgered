@@ -12,6 +12,7 @@ class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
         fields = '__all__'
+        exclude = ['owner']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,21 +43,21 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = '__all__'
+        exclude = ['owner']
 
 
 class SubcategoryForm(forms.ModelForm):
     class Meta:
         model = Subcategory
         fields = '__all__'
-        # TODO why we do this?
-        # this excludes "category" on form validation
-        exclude = ("category",)
+        exclude = ['owner']
 
 
 class DescriptionForm(forms.ModelForm):
     class Meta:
         model = Description
         fields = '__all__'
+        exclude = ['owner']
 
 
 class SeedRequestForm(forms.ModelForm):
