@@ -12,10 +12,11 @@ class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
         fields = '__all__'
-        exclude = ['owner']
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(TransactionForm, self).__init__(*args, **kwargs)
+        self.fields['owner'].widget = forms.HiddenInput()
+
         # read only keeps us from editing these fields in the form.
         # Doesn't seem to work with dropdowns.
         readonly_fields = [
@@ -40,24 +41,29 @@ class AccountForm(forms.ModelForm):
 
 
 class CategoryForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CategoryForm, self).__init__(*args, **kwargs)
+        self.fields['owner'].widget = forms.HiddenInput()
+
     class Meta:
         model = Category
         fields = '__all__'
-        exclude = ['owner']
 
 
 class SubcategoryForm(forms.ModelForm):
     class Meta:
         model = Subcategory
         fields = '__all__'
-        exclude = ['owner']
 
 
 class DescriptionForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DescriptionForm, self).__init__(*args, **kwargs)
+        self.fields['owner'].widget = forms.HiddenInput()
+
     class Meta:
         model = Description
         fields = '__all__'
-        exclude = ['owner']
 
 
 class SeedRequestForm(forms.ModelForm):

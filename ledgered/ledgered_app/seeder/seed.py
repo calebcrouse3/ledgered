@@ -8,6 +8,9 @@ import os
 import csv
 from ..forms import CategoryForm, SubcategoryForm, DescriptionForm, TransactionForm, AccountForm
 from ..models import PLUGINS, Account, Category, Subcategory
+import logging.config
+from ..config import LOGGER_CONFIG_PATH
+logging.config.fileConfig(LOGGER_CONFIG_PATH)
 
 
 class Seeder:
@@ -50,6 +53,7 @@ class CategorySeeder(Seeder):
         self.SEED_FILEPATH = os.getcwd() + "/ledgered_app/resources/categories/" + source_filename
         self.RUN_SEED = self.set_run_seed(source_filename)
         self.USER = user
+        self.LOGGER = logging.getLogger('seeder')
 
     def seed(self):
         if not self.RUN_SEED:
@@ -58,26 +62,37 @@ class CategorySeeder(Seeder):
         values = self.load_yaml(self.SEED_FILEPATH)
 
         for category, subcategories in values.items():
+            self.LOGGER.debug(f"number of subcategories for {category}: {len(subcategories)}")
+
             cat_data = {
                 "owner": self.USER,
                 "name": category.title()
             }
             cat_form = CategoryForm(cat_data)
+
             if cat_form.is_valid():
                 cat_obj = cat_form.save(commit=False)
                 cat_obj.save()
+                self.LOGGER.debug(f"successfully saved category: {cat_form.data}")
+            else:
+                cat_obj = None
+                self.LOGGER.debug(f"failed to save category: {cat_form.errors}")
 
-                if cat_obj:
-                    for subcat in subcategories:
-                        subcat_data = {
-                            "name": subcat.title()
-                        }
-                        subcat_form = SubcategoryForm(subcat_data)
+            if cat_obj:
+                for subcat in subcategories:
 
-                        if subcat_form.is_valid():
-                            subcat_obj = subcat_form.save(commit=False)
-                            subcat_obj.category = cat_obj
-                            subcat_obj.save()
+                    subcat_data = {
+                        "name": subcat.title(),
+                        "category": cat_obj
+                    }
+                    subcat_form = SubcategoryForm(subcat_data)
+
+                    if subcat_form.is_valid():
+                        subcat_obj = subcat_form.save(commit=False)
+                        subcat_obj.save()
+                        self.LOGGER.debug(f"successfully saved subcategory: {subcat_form.data}")
+                    else:
+                        self.LOGGER.debug(f"failed to save subcategory: {subcat_form.errors}")
 
 
 class DescriptionSeeder(Seeder):

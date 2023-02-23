@@ -195,6 +195,8 @@ def list_categories(request):
     for cat in categories:
         # get subcategories for each category
         subcategories = Category.objects.get(id=cat.id).subcategory_set.order_by('name')
+        print(cat)
+        print(subcategories)
         cats_subcats[cat.name] = [subcat.name for subcat in subcategories]
 
     context = {'cats_subcats': cats_subcats}
