@@ -5,12 +5,13 @@
         <a href="{% url 'ledgered_app:ledger' %}">Ledger</a> -
         <a href="{% url 'ledgered_app:reports' %}">Reports</a> -
         <a href="{% url 'ledgered_app:manage' %}">Manage</a> -
-        <a href="{% url 'ledgered_app:seeder' %}">Seeder</a> -
-        <a href="{% url 'ledgered_app:categories_list' %}">categories_list</a> -
-        <a href="{% url 'ledgered_app:description_list' %}">description_list</a> -
-        <a href="{% url 'ledgered_app:transaction_list' %}">transaction_list</a> -
-        <a href="{% url 'ledgered_app:account_list' %}">account_list</a> -
-        <a href="{% url 'ledgered_app:delete_all' %}">delete_all</a>
+        <a href="{% url 'ledgered_app:seed' %}">Seed</a> -
+        <a>DEBUG</a> -
+        <a href="{% url 'ledgered_app:list_categories' %}">Categories</a> -
+        <a href="{% url 'ledgered_app:list_descriptions' %}">Descriptions</a> -
+        <a href="{% url 'ledgered_app:list_transactions' %}">Transactions</a> -
+        <a href="{% url 'ledgered_app:list_accounts' %}">Accounts</a> -
+        <a href="{% url 'ledgered_app:delete_all' %}">Nuke</a>
         <hr />
         Hello, {{ user.username }} -
         <a href="{% url 'accounts:logout' %}">Log Out</a>

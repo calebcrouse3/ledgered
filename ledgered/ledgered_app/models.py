@@ -14,6 +14,16 @@ PLUGINS = [
 ]
 
 
+def get_enum_values(nested_enum):
+    """Returns the second value in each struct of an enum like PLUGINS or TRANSACTION_TYPES"""
+    return [x[1] for x in nested_enum]
+
+
+def get_enum_keys(nested_enum):
+    """Returns the first value in each struct of an enum like PLUGINS or TRANSACTION_TYPES"""
+    return [x[0] for x in nested_enum]
+
+
 class Account(models.Model):
     name = models.CharField(
         max_length=100,

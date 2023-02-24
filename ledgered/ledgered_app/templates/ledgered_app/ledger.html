@@ -4,7 +4,7 @@
 <p>
     You have {{ num_uncategorized }} uncategorized transactions!
     {% if num_uncategorized > 0 %}
-    <a href="{% url 'ledgered_app:categorize_next_transaction' %}">Categorize Transactions</a>
+    <a href="{% url 'ledgered_app:ledger_queue' %}">Categorize Transactions</a>
     {% endif %}
 </p>
 {% endblock content %}

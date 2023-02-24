@@ -1,18 +1,14 @@
-from .models import PLUGINS
-from .plugins.mint import MintPlugin
-from .plugins.fidelity import FidelityPlugin
-from .plugins.chase import ChasePlugin
-
-
-def get_plugin_types():
-    return [x[0] for x in PLUGINS]
+from ..models import PLUGINS, get_enum_values
+from ..plugins.chase import ChasePlugin
+from ..plugins.mint import MintPlugin
+from ..plugins.fidelity import FidelityPlugin
 
 
 def handle_upload(file, account_type, user):
     """Pass the uploaded file to the correct plugin.
     The process_file() function returns dictionary of file processing results
     """
-    plugin_types = get_plugin_types()
+    plugin_types = get_enum_values(PLUGINS)
 
     if account_type == "Mint" and "Mint" in plugin_types:
         mint = MintPlugin(user)

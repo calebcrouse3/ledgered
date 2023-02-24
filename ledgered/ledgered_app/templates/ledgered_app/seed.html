@@ -34,7 +34,7 @@
 
     <h1>Seed Request</h1>
 
-        <form action="{% url 'ledgered_app:seeder' %}" method='post'>
+        <form action="{% url 'ledgered_app:seed' %}" method='post'>
             {% csrf_token %}
 
             {{ form.name }}

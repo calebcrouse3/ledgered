@@ -1,11 +1,11 @@
-from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 
-from .seeder.seed import CategorySeeder, DescriptionSeeder, TransactionSeeder, AccountSeeder, DescriptionForm
-from .upload_handler import handle_upload
-from .forms import FileUploadForm, TransactionForm, SeedRequestForm
+from .seeder.seeders import *
+from .utils.handle_upload import handle_upload
+from .forms import FileUploadForm, TransactionForm, SeedRequestForm, DescriptionForm
 from .models import Category, Description, Transaction, SeedRequest, Subcategory, Account
-from .config import RESOURCE_PATH
+from .utils.form_utils import save_form
+from .configs.config import RESOURCE_PATH
 from django.views.generic import ListView
 from django.contrib.auth.decorators import login_required
 from bokeh.plotting import figure
@@ -37,7 +37,7 @@ def upload(request):
 @login_required
 def ledger(request):
     """Entry point for categorizing new transactions."""
-    context = {"num_uncategorized": get_num_uncategorized_transactions(request.user)}
+    context = {"num_uncategorized": get_queue_size(request.user)}
     return render(request, 'ledgered_app/ledger.html', context)
 
 
@@ -48,13 +48,8 @@ def load_subcategories(request):
     return render(request, 'ledgered_app/subcategory_options.html', {'subcategories': subcategories})
 
 
-def get_num_uncategorized_transactions(user):
+def get_queue_size(user):
     return Transaction.objects.filter(category=None, owner=user).count()
-
-
-def get_next_uncategorized_transaction(user):
-    # returns none if transaction doesnt exist
-    return Transaction.objects.filter(category=None, owner=user).first()
 
 
 def get_pretty_description(original_description, user):
@@ -74,75 +69,61 @@ def get_pretty_description(original_description, user):
     return None
 
 
-def get_prev_transaction(pretty_description, user):
-    """Use the categories and subcategories of previous transactions to lookup category and subcategory
-    TODO could check if theres multiple different cats and subcats and maybe you want to do something different
-    """
-    return Transaction.objects.filter(owner=user, pretty_description=pretty_description, category__isnull=False).first()
-
-
 @login_required
-def categorize_next_transaction(request):
+def ledger_queue(request):
     """Edit the category and subcategory of a transaction."""
-    num_uncategorized = get_num_uncategorized_transactions(request.user)
+    num_uncategorized = get_queue_size(request.user)
 
     # if no remaining transactions go back to ledger landing page
     if num_uncategorized == 0:
         return redirect('ledgered_app:ledger')
 
-    next_trxn = get_next_uncategorized_transaction(request.user)
+    # get the next transaction in the ledger queue
+    next_trxn = Transaction.objects.filter(category=None, owner=request.user).first()
 
+    # return transaction and description form for user input
     if request.method != 'POST':
+        context = {"num_uncategorized": num_uncategorized}
+
         pretty_dscr = get_pretty_description(next_trxn.original_description, request.user)
 
         if pretty_dscr:
             next_trxn.pretty_description = pretty_dscr
-
             # use pretty description to lookup subcategory
-            prev_trxn = get_prev_transaction(pretty_dscr, request.user)
+            # could expand this to be smarter later
+            prev_trxn = Transaction.objects.filter(
+                owner=request.user,
+                pretty_description=pretty_dscr,
+                category__isnull=False
+            ).first()
+
             if prev_trxn:
                 next_trxn.category = prev_trxn.category
                 next_trxn.subcategory = prev_trxn.subcategory
 
-        trxn_form = TransactionForm(instance=next_trxn)
+            context['trxn_form'] = TransactionForm(instance=next_trxn)
+            context['dscr_form'] = DescriptionForm()
 
-        # if there's no description rule for this transaction,
-        # give them a head start by putting the original string in the description box
-        if not next_trxn.pretty_description:
-            dscr_form = DescriptionForm({"description": next_trxn.original_description.title()})
+        # if there's no pretty description and this, description rule, for this transaction,
+        # give them a head start by putting the original string in the description form box
         else:
-            dscr_form = DescriptionForm()
+            context['dscr_form'] = DescriptionForm({"description": next_trxn.original_description.title()})
 
+        return render(request, 'ledgered_app/ledger_queue.html', context)
+
+    # save the submitted transaction and redirect to the ledger queue
     else:
+        # id from the form defined in the template
         if 'submit_transaction' in request.POST:
             trxn_form = TransactionForm(instance=next_trxn, data=request.POST)
-            if trxn_form.is_valid():
-                trxn_obj = trxn_form.save(commit=False)
-                trxn_obj.owner = request.user
-                trxn_obj.save()
-                return redirect('ledgered_app:categorize_next_transaction')
-            else:
-                print("Form Errors:\n", trxn_form.errors)
-                return render(request, 'ledgered_app/invalid_form.html', {'error': trxn_form.errors})
+            save_form(trxn_form, request.user)
+            return redirect('ledgered_app:ledger_queue')
 
+        # id from the form defined in the template
         elif 'submit_description' in request.POST:
             dscr_form = DescriptionForm(data=request.POST)
-            if dscr_form.is_valid():
-                dscr_obj = dscr_form.save(commit=False)
-                dscr_obj.owner = request.user
-                dscr_obj.save()
-                return redirect('ledgered_app:categorize_next_transaction')
-            else:
-                print("Form Errors:\n", dscr_form.errors)
-                return render(request, 'ledgered_app/invalid_form.html', {'error': dscr_form.errors})
-
-    context = {
-        'trxn_form': trxn_form,
-        'dscr_form': dscr_form,
-        "num_uncategorized": num_uncategorized
-    }
-
-    return render(request, 'ledgered_app/categorize_next_transaction.html', context)
+            save_form(dscr_form, request.user)
+            return redirect('ledgered_app:ledger_queue')
 
 
 @login_required
@@ -152,21 +133,18 @@ def manage(request):
 
 
 @login_required
-def seeder(request):
+def seed(request):
     # posting a seed request for the first time
     if request.method == 'POST':
         form = SeedRequestForm(request.POST)
-        if form.is_valid():
-            seed_database(
-                form['descriptions_filename'].data,
-                form['categories_filename'].data,
-                form['transactions_filename'].data,
-                request.user
-            )
-            seeded_obj = form.save(commit=False)
-            seeded_obj.save()
-            return redirect('ledgered_app:seeder')
+        save_form(form)
+        seed_accounts()
+        seed_categories(form['categories_filename'].data, request.user)
+        seed_descriptions(form['descriptions_filename'].data, request.user)
+        seed_transactions(form['transactions_filename'].data, request.user)
+        return redirect('ledgered_app:seed')
     else:
+        # populate the form with the filenames from the correct resource's folder + "none"
         def filename_options(folder):
             return [(f, f) for f in os.listdir(RESOURCE_PATH + folder) + ["none"]]
 
@@ -180,33 +158,7 @@ def seeder(request):
             "num_seeds": seeds.count(),
             "seeds": seeds
         }
-        return render(request, 'ledgered_app/seed_request.html', context)
-
-
-def seed_database(description_filename, category_filename, transaction_filename, user):
-    account_seeder = AccountSeeder()
-    cat_seeder = CategorySeeder(category_filename, user)
-    descr_seeder = DescriptionSeeder(description_filename, user)
-    entries_seeder = TransactionSeeder(transaction_filename, user)
-    account_seeder.seed()
-    cat_seeder.seed()
-    descr_seeder.seed()
-    entries_seeder.seed()
-
-
-@login_required
-def list_categories(request):
-    """Print all categories in data base"""
-    cats_subcats = {}
-    categories = Category.objects.filter(owner=request.user).order_by('name')
-    for cat in categories:
-        # get subcategories for each category
-        subcategories = Category.objects.get(id=cat.id).subcategory_set.order_by('name')
-        cats_subcats[cat.name] = [subcat.name for subcat in subcategories]
-
-    context = {'cats_subcats': cats_subcats}
-
-    return render(request, 'ledgered_app/list_categories.html', context)
+        return render(request, 'ledgered_app/seed.html', context)
 
 
 @login_required
@@ -226,6 +178,7 @@ def reports(request):
 
 @login_required
 def delete_all(request):
+    # TODO give options to only delete for this user
     for model in [Transaction, Category, Subcategory, Description, SeedRequest, Account]:
         model.objects.all().delete()
 
@@ -252,3 +205,18 @@ class DescriptionListView(ListView):
 
 class AccountListView(ListView):
     model = Account
+
+
+@login_required
+def list_categories(request):
+    """Print all categories in data base"""
+    cats_subcats = {}
+    categories = Category.objects.filter(owner=request.user).order_by('name')
+    for cat in categories:
+        # get subcategories for each category
+        subcategories = Category.objects.get(id=cat.id).subcategory_set.order_by('name')
+        cats_subcats[cat.name] = [subcat.name for subcat in subcategories]
+
+    context = {'cats_subcats': cats_subcats}
+
+    return render(request, 'ledgered_app/list_categories.html', context)
