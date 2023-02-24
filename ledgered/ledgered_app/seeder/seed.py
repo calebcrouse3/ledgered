@@ -65,13 +65,13 @@ class CategorySeeder(Seeder):
             self.LOGGER.debug(f"number of subcategories for {category}: {len(subcategories)}")
 
             cat_data = {
-                "owner": self.USER,
                 "name": category.title()
             }
             cat_form = CategoryForm(cat_data)
 
             if cat_form.is_valid():
                 cat_obj = cat_form.save(commit=False)
+                cat_obj.owner = self.USER
                 cat_obj.save()
                 self.LOGGER.debug(f"successfully saved category: {cat_form.data}")
             else:
@@ -110,7 +110,6 @@ class DescriptionSeeder(Seeder):
             # should only be one key per dict but use this format anyway
             for description, predicate in rule.items():
                 dscr_data = {
-                        "owner": self.USER,
                         "description": description.title(),
                         "predicate": predicate
                     }
@@ -119,6 +118,7 @@ class DescriptionSeeder(Seeder):
 
                 if dscr_form.is_valid():
                     descr_obj = dscr_form.save(commit=False)
+                    descr_obj.owner = self.USER
                     descr_obj.save()
 
 
@@ -148,7 +148,6 @@ class TransactionSeeder(Seeder):
         for row in csv_data:
 
             entry_data = {
-                'owner': self.USER,
                 'date': row[0],
                 'type': row[1],
                 'amount': row[2],
@@ -167,6 +166,7 @@ class TransactionSeeder(Seeder):
 
             if transaction_form.is_valid():
                 entry_obj = transaction_form.save(commit=False)
+                entry_obj.owner = self.USER
                 entry_obj.save()
             else:
                 print(f"Seeder filed to validate transaction form with data {entry_data}")

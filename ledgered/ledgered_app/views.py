@@ -117,17 +117,24 @@ def categorize_next_transaction(request):
         if 'submit_transaction' in request.POST:
             trxn_form = TransactionForm(instance=next_trxn, data=request.POST)
             if trxn_form.is_valid():
-                trxn_form.save()
+                trxn_obj = trxn_form.save(commit=False)
+                trxn_obj.owner = request.user
+                trxn_obj.save()
                 return redirect('ledgered_app:categorize_next_transaction')
             else:
                 print("Form Errors:\n", trxn_form.errors)
-                return render(request, 'ledgered_app/invalid_transaction_form.html', {'error': trxn_form.errors})
+                return render(request, 'ledgered_app/invalid_form.html', {'error': trxn_form.errors})
 
         elif 'submit_description' in request.POST:
             dscr_form = DescriptionForm(data=request.POST)
             if dscr_form.is_valid():
-                dscr_form.save()
+                dscr_obj = dscr_form.save(commit=False)
+                dscr_obj.owner = request.user
+                dscr_obj.save()
                 return redirect('ledgered_app:categorize_next_transaction')
+            else:
+                print("Form Errors:\n", dscr_form.errors)
+                return render(request, 'ledgered_app/invalid_form.html', {'error': dscr_form.errors})
 
     context = {
         'trxn_form': trxn_form,
@@ -195,8 +202,6 @@ def list_categories(request):
     for cat in categories:
         # get subcategories for each category
         subcategories = Category.objects.get(id=cat.id).subcategory_set.order_by('name')
-        print(cat)
-        print(subcategories)
         cats_subcats[cat.name] = [subcat.name for subcat in subcategories]
 
     context = {'cats_subcats': cats_subcats}
