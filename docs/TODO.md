@@ -16,3 +16,11 @@
     - complete versus incomplete
   - Is there a way to fail when processing raw transaction df by only dropping a single row and not the whole data frame?
   - Maybe do everything like by line and without pandas? Even the aggregation? Or maybe just do as little as possible with pandas
+
+
+# Helpful!
+
+if your jypter notebook cant find the installed packages, run this with the venv activated then select the right kernel
+in the notebook
+
+(venv) $ ipython kernel install --name "local-venv-kernel" --user
