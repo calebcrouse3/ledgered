@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from .seeder.seeders import *
 from .utils.handle_upload import handle_upload
 from .forms import FileUploadForm, TransactionForm, SeedRequestForm, DescriptionForm
-from .models import Category, Description, Transaction, SeedRequest, Subcategory, Account
+from .models import *
 from .utils.form_utils import save_form
 from .configs.config import RESOURCE_PATH
 from django.views.generic import ListView
@@ -15,23 +15,6 @@ import os
 
 def index(request):
     return render(request, 'ledgered_app/index.html')
-
-
-@login_required
-def upload(request):
-    """Page to upload transaction files."""
-
-    if request.method == 'POST':
-        form = FileUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            file_upload = form.save(commit=False)
-            summary = handle_upload(request.FILES['file'], file_upload.account_type, request.user)
-            return render(request, 'ledgered_app/upload_summary.html', context={"summary": summary})
-    else:
-        form = FileUploadForm()
-
-    context = {'form': form}
-    return render(request, 'ledgered_app/upload.html', context)
 
 
 @login_required
@@ -137,7 +120,7 @@ def seed(request):
     # posting a seed request for the first time
     if request.method == 'POST':
         form = SeedRequestForm(request.POST)
-        save_form(form)
+        save_form(form, request.user)
         seed_accounts()
         seed_categories(form['categories_filename'].data, request.user)
         seed_descriptions(form['descriptions_filename'].data, request.user)
@@ -148,17 +131,37 @@ def seed(request):
         def filename_options(folder):
             return [(f, f) for f in os.listdir(RESOURCE_PATH + folder) + ["none"]]
 
-        seeds = SeedRequest.objects.all()
+        seeds = SeedRequest.objects.filter(owner=request.user)
         form = SeedRequestForm()
         context = {
             "form": form,
             "descriptions": filename_options("descriptions"),
             "categories": filename_options("categories"),
             "transactions": filename_options("transactions"),
-            "num_seeds": seeds.count(),
             "seeds": seeds
         }
         return render(request, 'ledgered_app/seed.html', context)
+
+
+@login_required
+def upload(request):
+    """Page to upload transaction files."""
+
+    if request.method == 'POST':
+        form = FileUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            file_upload = form.save(commit=False)
+            handle_upload(request.FILES['file'], file_upload.account_type, request.user)
+            return redirect('ledgered_app:upload')
+    else:
+        uploads = UploadSummary.objects.filter(owner=request.user)
+        form = FileUploadForm()
+        context = {
+            "form": form,
+            "uploads": uploads
+        }
+
+        return render(request, 'ledgered_app/upload.html', context)
 
 
 @login_required
@@ -179,7 +182,7 @@ def reports(request):
 @login_required
 def delete_all(request):
     # TODO give options to only delete for this user
-    for model in [Transaction, Category, Subcategory, Description, SeedRequest, Account]:
+    for model in [Transaction, Category, Subcategory, Description, SeedRequest, Account, UploadSummary]:
         model.objects.all().delete()
 
     return render(request, 'ledgered_app/delete_all.html')

@@ -1,12 +1,58 @@
 {% extends "ledgered_app/base.html" %}
 
 {% block content %}
-<p>Here you will upload files to be fed into the database.</p>
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simple_table.css' %}">
+</head>
+<body>
+    <h1>Previous Uploads</h1>
 
-<form action="{% url 'ledgered_app:upload' %}" method='post', enctype=multipart/form-data>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button name="submit">Submit Upload</button>
-  </form>
+    <table>
+      <thead>
+        <tr>
+          <th>Filename</th>
+          <th>Date Added</th>
+          <th>Account</th>
+          <th>Min Date</th>
+          <th>Max Date</th>
+          <th>New</th>
+          <th>Updated</th>
+          <th>Ignored</th>
+          <th>Error</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in uploads %}
+        <tr>
+          <td>{{ d.filename }}</td>
+          <td>{{ d.date_added }}</td>
+          <td>{{ d.account }}</td>
+          <td>{{ d.min_date }}</td>
+          <td>{{ d.max_date }}</td>
+          <td>{{ d.new }}</td>
+          <td>{{ d.updated }}</td>
+          <td>{{ d.ignored }}</td>
+          <td>{{ d.error }}</td>
+        </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">No Uploads yet.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h1>Upload Request</h1>
+
+    <form action="{% url 'ledgered_app:upload' %}" method='post' enctype=multipart/form-data>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button name="submit">Submit Upload</button>
+    </form>
+
+    </body>
+</html>
 
 {% endblock content %}

@@ -3,14 +3,14 @@ uploads from various 3rd parties and inserts transactions data into the database
 
 import re
 from pandas import DataFrame
-from ..forms import TransactionForm
+from ..forms import TransactionForm, UploadSummaryForm
 from ..models import Transaction, Account
+from ..utils.form_utils import save_form
 
 NEW = "new"
 UPDATED = "updated"
 IGNORED = "ignored"
-FORM_ERROR = "form_error"
-OTHER_ERROR = "other_error"
+ERROR = "error"
 
 
 class Plugin:
@@ -114,7 +114,6 @@ class Plugin:
         """Takes a row from df and determines what to do with it."""
 
         form_data = {
-            'owner': self.USER,
             "date": row["date"],
             "type": row["type"],
             "amount": round(row["amount"], 2),
@@ -132,15 +131,11 @@ class Plugin:
             return self.handle_matching_trxn(form, matching_entry)
 
         elif not matching_entry:
-            if form.is_valid():
-                form.save()
-                return NEW
-            else:
-                print(form.errors)
-                return FORM_ERROR
+            save_form(form, self.USER)
+            return NEW
 
         else:
-            return OTHER_ERROR
+            return ERROR
 
     def verify_processed_df(self, df):
         # verify all columns are present and there's no extra columns
@@ -166,12 +161,15 @@ class Plugin:
     def process_file(self, file):
         """Process file data into the database"""
 
-        file_upload_result_summary = {
+        file_upload_summary_data = {
             "new": 0,
             "updated": 0,
             "ignored": 0,
-            "form_error": 0,  # should error just throw an exception?
-            "other_error": 0  # should error just throw an exception?
+            "error": 0,
+            "filename": file.name,
+            "account": self.ACCOUNT_NAME,
+            "min_date": None,
+            "max_date": None
         }
 
         if file.size > 10e5:
@@ -191,7 +189,23 @@ class Plugin:
         self.verify_processed_df(processed_df)
 
         for _, row in processed_df.iterrows():
-            entry_results = self.process_new_potential_transaction(row)
-            file_upload_result_summary[entry_results] += 1
 
-        return file_upload_result_summary
+            # handle dates
+            date = row['date']
+
+            if not file_upload_summary_data["min_date"]:
+                file_upload_summary_data["min_date"] = date
+                file_upload_summary_data["max_date"] = date
+
+            if date < file_upload_summary_data["min_date"]:
+                file_upload_summary_data["min_date"] = date
+
+            if date > file_upload_summary_data["max_date"]:
+                file_upload_summary_data["max_date"] = date
+
+            # process contents and get back NEW, DUPLICATE, IGNORE, ERROR
+            entry_results = self.process_new_potential_transaction(row)
+            file_upload_summary_data[entry_results] += 1
+
+        summary_form = UploadSummaryForm(data=file_upload_summary_data)
+        save_form(summary_form, self.USER)

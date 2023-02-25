@@ -115,7 +115,21 @@ class FileUpload(models.Model):
 
 
 class SeedRequest(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     descriptions_filename = models.CharField(max_length=200)
     categories_filename = models.CharField(max_length=200)
     transactions_filename = models.CharField(max_length=200)
     date_added = models.DateTimeField(auto_now_add=True)
+
+
+class UploadSummary(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    filename = models.CharField(max_length=200)
+    date_added = models.DateTimeField(auto_now_add=True)
+    account = models.CharField(max_length=200)
+    min_date = models.DateField()
+    max_date = models.DateField()
+    new = models.IntegerField()
+    updated = models.IntegerField()
+    ignored = models.IntegerField()
+    error = models.IntegerField()

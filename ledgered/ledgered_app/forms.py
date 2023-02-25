@@ -64,3 +64,11 @@ class SeedRequestForm(forms.ModelForm):
     class Meta:
         model = SeedRequest
         fields = '__all__'
+        exclude = ('owner',)
+
+
+class UploadSummaryForm(forms.ModelForm):
+    class Meta:
+        model = UploadSummary
+        fields = '__all__'
+        exclude = ('owner',)
