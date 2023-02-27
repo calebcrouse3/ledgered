@@ -131,5 +131,5 @@ class UploadSummary(models.Model):
     max_date = models.DateField()
     new = models.IntegerField()
     updated = models.IntegerField()
-    ignored = models.IntegerField()
+    duplicate = models.IntegerField()
     error = models.IntegerField()

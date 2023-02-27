@@ -8,7 +8,7 @@ import os
 from ..forms import CategoryForm, SubcategoryForm, DescriptionForm, TransactionForm, AccountForm
 from ..models import PLUGINS, Account, Category, Subcategory, get_enum_values
 from ..configs.config import LOGGER_CONFIG_PATH, RESOURCE_PATH
-from ..utils.file_loaders import *
+from ..utils.file_utils import *
 from ..utils.form_utils import save_form
 
 

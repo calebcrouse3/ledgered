@@ -1,4 +1,4 @@
-from .plugin import Plugin
+from .plugin import Plugin, sign_to_type
 from datetime import datetime
 import pandas as pd
 import logging
@@ -38,7 +38,7 @@ class ChasePlugin(Plugin):
         processed_df = df.copy()
         processed_df["original_description"] = processed_df["description"].astype("string")
         # -/+ amount is debit/credit
-        processed_df["type"] = processed_df["amount"].apply(lambda x: self.sign_to_type(x)).astype("string")
+        processed_df["type"] = processed_df["amount"].apply(lambda x: sign_to_type(x)).astype("string")
         processed_df["amount"] = processed_df["amount"].astype(float).apply(abs)
         processed_df["date"] = processed_df["transaction_date"].apply(lambda x: datetime.strptime(x, "%m/%d/%Y").date())
         return processed_df[self.OUTPUT_SCHEMA.keys()]

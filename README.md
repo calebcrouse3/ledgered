@@ -17,40 +17,35 @@ ledgered has a single unified transaction schema
 | subcategory          | More detailed category for this transaction                                     |                  | T        | T          |
 
 Uploaded files from your accounts and banks are facilitated by a "plugin" (ex: chase, fidelity). A plugin defines the
-name of the account/plugin, the input schema, and a function that converts the uploaded data into the correct format.
-The parent plugin class defines all the other generic operations needed to convert a file upload into transactions
-which can be written into the database.
+name of the account/plugin, the input schema, and a function that transforms the uploaded data into the unified 
+transaction schema. The "Plugin" parent class defines all the other generic operations needed to convert a file upload 
+into transaction data which can be written into the database.
 
-The fields that unique define a transaction (not considered the pk's though) are:
-[date, account, type, amount, original_description]
+The fields that unique define a transaction (not considered the pk's from the database, though) are:
+(date, account, type, amount, original_description)
 
 This basically means that if you had more than one of the same transaction in the same account from the same day that 
-we are going to only take the transaction with the highest value. We need a way to unique identify transactions so that
-when a user uploads another transaction file we don't accidentally duplicate transaction in the database. We only want
-to add new transactions to the database. Do we need to aggregate these values though? When would not aggregating mess
-us up? 
-
-If a transaction is updated with a new amount, like adding a tip.
-
-What does this buy us?
-
-What might go wrong here?
+we are going to sum the amounts for those transactions and only save a single value to the database. We need a way to 
+unique identify transactions so that when a user uploads another transaction file we don't accidentally duplicate transaction in the database for instances where 
+the timeframe of 2 uploads overlaps. We only want to add new transactions to the database. 
 
 The steps of processing an uploaded file using a plugin are roughly as follows.
 
 Steps:
-- receive upload form with account type and filename/contents
+- receive upload form with account type (corresponding to plugin type), filename, and file data
   - account types are stored in database and correspond to enum in models.py
-- Instantiate the correct plugin class by reading the upload form account type
+- Instantiate the correct plugin class corresponding to the upload form
 - pass file contents (probably always .csv) to plugin.process_file()
 - check that file isn't too large
 - parse file headers and values into lists
 - verify that headers from file match the expected headers defined in the plugin
 - create a dataframe from file
-- call plugin subclass specific process_raw_df() to map raw df into master transaction schema
-- aggregate the processed df # gonna skip this for now!
+- call process_raw_df() defined on plugin subclasses to transform raw df into unified transaction schema
+- aggregate the processed df by (date, type, amount, original_description)
+  - since each raw dataframe can only correspond to one account, we implicitly group by account type
 - verify the processed output df from the plugin subclass
 - For each transaction, determine if its already in the database, if not, add it!
+  - If we find an existing transaction with the same (date, account, type, amount, original_description) then skip
 
 ## The Ledger
 
