@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 
 from .seeder.seeders import *
 from .utils.handle_upload import handle_upload
-from .forms import FileUploadForm, TransactionForm, SeedRequestForm, DescriptionForm
+from .forms import FileUploadForm, TransactionForm, SeedRequestForm, DescriptionForm, LedgerTransactionForm
 from .models import *
 from .utils.form_utils import save_form
 from .configs.config import RESOURCE_PATH
@@ -91,7 +91,9 @@ def ledger_queue(request):
         else:
             context['dscr_form'] = DescriptionForm({"description": next_trxn.original_description.title()})
 
-        context['trxn_form'] = TransactionForm(instance=next_trxn)
+        # here need to limit the categories to only this user
+        trxn_form = LedgerTransactionForm(instance=next_trxn, user=request.user)
+        context['trxn_form'] = trxn_form
 
         return render(request, 'ledgered_app/ledger_queue.html', context)
 
@@ -122,7 +124,11 @@ def seed(request):
     if request.method == 'POST':
         form = SeedRequestForm(request.POST)
         save_form(form, request.user)
-        seed_accounts()
+
+        # TODO accounts per owner. This is ugly. Only add accounts of first request
+        if SeedRequest.objects.all().count() == 1:
+            seed_accounts()
+
         seed_categories(form['categories_filename'].data, request.user)
         seed_descriptions(form['descriptions_filename'].data, request.user)
         seed_transactions(form['transactions_filename'].data, request.user)

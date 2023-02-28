@@ -7,7 +7,6 @@
   - Updating
   - AUTH:
   - Transfers
-- cascading dropdowns for subcategories not working because need to get categories only for current user
 - ENUMs
   - define and enforce transaction and plugin types
   - single letter versus whole word
@@ -18,7 +17,7 @@
   - Maybe do everything line by line and without pandas? Even the aggregation? Or maybe just do as little as possible with pandas
 - What about using the CSV module for parsing resources?
 - Need some sort of message on screen when not entering transaction data correctly
-
+- Not subcategory options available when category is none. You can see all the subcategories in the DD when you first open the ledger queue
 
 # Helpful!
 

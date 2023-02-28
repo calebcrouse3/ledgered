@@ -34,6 +34,12 @@ class TransactionForm(forms.ModelForm):
                 field.widget.attrs['readonly'] = True
 
 
+class LedgerTransactionForm(TransactionForm):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].queryset = Category.objects.filter(owner=user)
+
+
 class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
