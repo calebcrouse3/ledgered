@@ -14,6 +14,7 @@ urlpatterns = [
     path('manage', views.manage, name='manage'),
     path('seed', views.seed, name='seed'),
     path('ajax/load_subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
+    path('export', views.export, name='export'),
 
     # for debugging
     path('list_categories', views.list_categories, name='list_categories'),

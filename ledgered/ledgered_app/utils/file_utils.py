@@ -1,6 +1,9 @@
 import yaml
 import csv
 
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
+
 
 def load_yaml(file_path):
     with open(file_path, "r") as stream:
@@ -15,25 +18,34 @@ def load_csv(file_path):
         csv_reader = csv.reader(read_obj)
         return list(csv_reader)
 
-"""
-TODO
-def download_csv(modeladmin, request, queryset):
+
+def download_csv(request, queryset, columns):
     if not request.user.is_staff:
         raise PermissionDenied
-    opts = queryset.model._meta
+
     model = queryset.model
-    response = HttpResponse(mimetype='text/csv')
-    # force download.
-    response['Content-Disposition'] = 'attachment;filename=export.csv'
+    model_fields = model._meta.fields + model._meta.many_to_many
+    field_names = [field.name for field in model_fields if field.name in columns]
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="export.csv"'
+
     # the csv writer
-    writer = csv.writer(response)
-    field_names = [field.name for field in opts.fields]
+    writer = csv.writer(response, delimiter=",")
     # Write a first row with header information
     writer.writerow(field_names)
     # Write data rows
-    for obj in queryset:
-        writer.writerow([getattr(obj, field) for field in field_names])
+    for row in queryset:
+        values = []
+        for field in field_names:
+            value = getattr(row, field)
+            if callable(value):
+                try:
+                    value = value() or ''
+                except:
+                    value = 'Error retrieving value'
+            if value is None:
+                value = ''
+            values.append(value)
+        writer.writerow(values)
     return response
-
-download_csv.short_description = "Download selected as csv"
-"""

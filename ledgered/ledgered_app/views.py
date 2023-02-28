@@ -84,13 +84,14 @@ def ledger_queue(request):
                 next_trxn.category = prev_trxn.category
                 next_trxn.subcategory = prev_trxn.subcategory
 
-            context['trxn_form'] = TransactionForm(instance=next_trxn)
             context['dscr_form'] = DescriptionForm()
 
         # if there's no pretty description and this, description rule, for this transaction,
         # give them a head start by putting the original string in the description form box
         else:
             context['dscr_form'] = DescriptionForm({"description": next_trxn.original_description.title()})
+
+        context['trxn_form'] = TransactionForm(instance=next_trxn)
 
         return render(request, 'ledgered_app/ledger_queue.html', context)
 
@@ -186,6 +187,23 @@ def delete_all(request):
         model.objects.all().delete()
 
     return render(request, 'ledgered_app/delete_all.html')
+
+
+def export(request):
+    columns = [
+        "date",
+        "type",
+        "amount",
+        "account",
+        "original_description",
+        "pretty_description",
+        "category",
+        "subcategory"
+    ]
+    transactions = Transaction.objects.all()
+    data = download_csv(request, transactions, columns)
+    response = HttpResponse(data, content_type='text/csv')
+    return response
 
 
 class TransactionListView(ListView):

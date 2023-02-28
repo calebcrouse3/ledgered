@@ -15,7 +15,9 @@
   - would be nice to have some error handing for a file upload that only uploads a portions of the transactions.
     - complete versus incomplete
   - Is there a way to fail when processing raw transaction df by only dropping a single row and not the whole data frame?
-  - Maybe do everything like by line and without pandas? Even the aggregation? Or maybe just do as little as possible with pandas
+  - Maybe do everything line by line and without pandas? Even the aggregation? Or maybe just do as little as possible with pandas
+- What about using the CSV module for parsing resources?
+- Need some sort of message on screen when not entering transaction data correctly
 
 
 # Helpful!
