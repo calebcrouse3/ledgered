@@ -18,6 +18,12 @@
 - What about using the CSV module for parsing resources?
 - Need some sort of message on screen when not entering transaction data correctly
 - Not subcategory options available when category is none. You can see all the subcategories in the DD when you first open the ledger queue
+- make an editor for description rules next to the description rule box
+- add a "divide" box for amount to compensate for things that will get split over venmo
+  - what about adding things you've paid to other people on venmo???
+  - Or things that were requested but not associated with a purchase?
+- Add accounts, categories, subcategories, descriptions for categorized transaction seeding if they don't already exist in database
+- Add tool tips for the different categories when going through the ledger process
 
 # Helpful!
 
@@ -25,3 +31,16 @@ if your jypter notebook cant find the installed packages, run this with the venv
 in the notebook
 
 (venv) $ ipython kernel install --name "local-venv-kernel" --user
+
+
+# Category Updates
+update grocery: Grocery/Convenience 
+add: Education
+consolidate: Bars/Restaurant's
+update shopping: games/sporting
+add: Travel - planes / trains
+
+what would OPEN AI art be?
+
+should categories/subcategories be connected to descriptions? That way the user can get category guesses with just
+a descriptions file? This is the best if the logic for looking up categories stays the same
