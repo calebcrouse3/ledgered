@@ -6,7 +6,7 @@ import os
 PWD = os.getcwd()
 
 config = configparser.ConfigParser()
-config.read(PWD + '/ledgered_app/configs/config.ini')
+config.read(PWD + '/ledgered/ledgered_app/configs/config.ini')
 
 # accessible config values
 RESOURCE_PATH = PWD + config.get('paths', 'resources')

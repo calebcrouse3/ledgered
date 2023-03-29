@@ -1,0 +1,6 @@
+alias pst='echo "\nYour Aliases\n" ; cat .bashrc ; echo "\n" '
+alias activate='source .venv/bin/activate'
+alias run='python ledgered/manage.py runserver'
+alias makemig='python ledgered/manage.py makemigrations'
+alias migrate='python ledgered/manage.py migrate'
+alias site='open http://127.0.0.1:8000/'
