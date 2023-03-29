@@ -34,12 +34,6 @@ in the notebook
 
 
 # Category Updates
-update grocery: Grocery/Convenience 
-add: Education
-consolidate: Bars/Restaurant's
-update shopping: games/sporting
-add: Travel - planes / trains
-
 what would OPEN AI art be?
 
 should categories/subcategories be connected to descriptions? That way the user can get category guesses with just

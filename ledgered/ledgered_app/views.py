@@ -24,13 +24,6 @@ def ledger(request):
     return render(request, 'ledgered_app/ledger.html', context)
 
 
-@login_required
-def load_subcategories(request):
-    category_id = request.GET.get('category')
-    subcategories = Subcategory.objects.filter(category_id=category_id).order_by('name')
-    return render(request, 'ledgered_app/subcategory_options.html', {'subcategories': subcategories})
-
-
 def get_queue_size(user):
     return Transaction.objects.filter(category=None, owner=user).count()
 
@@ -82,7 +75,6 @@ def ledger_queue(request):
 
             if prev_trxn:
                 next_trxn.category = prev_trxn.category
-                next_trxn.subcategory = prev_trxn.subcategory
 
             context['dscr_form'] = DescriptionForm()
 
@@ -189,7 +181,7 @@ def reports(request):
 @login_required
 def delete_all(request):
     # TODO give options to only delete for this user
-    for model in [Transaction, Category, Subcategory, Description, SeedRequest, Account, UploadSummary]:
+    for model in [Transaction, Category, Description, SeedRequest, Account, UploadSummary]:
         model.objects.all().delete()
 
     return render(request, 'ledgered_app/delete_all.html')
@@ -203,8 +195,7 @@ def export(request):
         "account",
         "original_description",
         "pretty_description",
-        "category",
-        "subcategory"
+        "category"
     ]
     transactions = Transaction.objects.all()
     data = download_csv(request, transactions, columns)
@@ -228,22 +219,25 @@ class DescriptionListView(ListView):
         queryset = super().get_queryset()
         queryset = queryset.filter(owner=self.request.user)
         return queryset
+    
+
+class CategoriesListView(ListView):
+    model = Category
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(owner=self.request.user)
+        return queryset
 
 
 class AccountListView(ListView):
     model = Account
 
 
-@login_required
+""" @login_required
 def list_categories(request):
-    """Print all categories in data base"""
-    cats_subcats = {}
+    # Print all categories in data base
     categories = Category.objects.filter(owner=request.user).order_by('name')
-    for cat in categories:
-        # get subcategories for each category
-        subcategories = Category.objects.get(id=cat.id).subcategory_set.order_by('name')
-        cats_subcats[cat.name] = [subcat.name for subcat in subcategories]
-
-    context = {'cats_subcats': cats_subcats}
-
+    context = {'categories': categories}
     return render(request, 'ledgered_app/list_categories.html', context)
+ """

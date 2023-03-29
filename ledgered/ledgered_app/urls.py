@@ -13,12 +13,11 @@ urlpatterns = [
     path('reports', views.reports, name='reports'),
     path('manage', views.manage, name='manage'),
     path('seed', views.seed, name='seed'),
-    path('ajax/load_subcategories/', views.load_subcategories, name='ajax_load_subcategories'),
     path('export', views.export, name='export'),
 
     # for debugging
-    path('list_categories', views.list_categories, name='list_categories'),
-
+    path('list_categories', views.CategoriesListView.as_view(template_name="ledgered_app/list_categories.html")
+         , name='list_categories'),
     path('list_transactions', views.TransactionListView.as_view(template_name="ledgered_app/list_transactions.html")
          , name='list_transactions'),
     path('list_descriptions', views.DescriptionListView.as_view(template_name="ledgered_app/list_descriptions.html")

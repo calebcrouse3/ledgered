@@ -5,8 +5,8 @@ Could be used to faciliate a description and category reset
 
 import logging.config
 import os
-from ..forms import CategoryForm, SubcategoryForm, DescriptionForm, TransactionForm, AccountForm
-from ..models import PLUGINS, Account, Category, Subcategory, get_enum_values
+from ..forms import CategoryForm, DescriptionForm, TransactionForm, AccountForm
+from ..models import PLUGINS, Account, Category, get_enum_values
 from ..configs.config import LOGGER_CONFIG_PATH, RESOURCE_PATH
 from ..utils.file_utils import *
 from ..utils.form_utils import save_form
@@ -19,27 +19,15 @@ logger = logging.getLogger('root')
 def seed_categories(filename, user):
     filepath = RESOURCE_PATH + "categories/" + filename
 
-    print(os.path.exists(filepath))
-
     if "none" in filename:
         return None
 
     values = load_yaml(filepath)
 
-    for category, subcategories in values.items():
-        logger.debug(f"number of subcategories for {category}: {len(subcategories)}")
+    for category in values["categories"]:
         cat_data = {"name": category.title()}
         cat_form = CategoryForm(cat_data)
-        cat_obj = save_form(cat_form, user)
-
-        if not cat_obj:
-            return None
-
-        for subcat in subcategories:
-            if subcat != "":
-                subcat_data = {"name": subcat.title(), "category": cat_obj}
-                subcat_form = SubcategoryForm(subcat_data)
-                save_form(subcat_form)
+        save_form(cat_form, user)
 
 
 def seed_descriptions(filename, user):
@@ -53,7 +41,8 @@ def seed_descriptions(filename, user):
     for rule in values["description_rules"]:
         # should only be one key per dict but use this format anyway
         for description, predicate in rule.items():
-            dscr_data = {"description": description.title(), "predicate": predicate}
+            dscr_data = {"description": description.title(),
+                         "predicate": predicate}
             dscr_form = DescriptionForm(dscr_data)
             save_form(dscr_form, user)
 
@@ -65,6 +54,8 @@ def seed_transactions(filename, user):
         return None
 
     trxn_data = load_csv(filepath)
+    
+    print(trxn_data)
 
     for trxn in trxn_data:
 
@@ -76,12 +67,11 @@ def seed_transactions(filename, user):
             'original_description': trxn[4]
         }
 
-        # this means the data also has categories
-        if len(trxn) == 8:
+        # this means the data also has a category
+        if len(trxn) > 5:
             entry_data['pretty_description'] = trxn[5]
+            print("TXN category", trxn[6])
             entry_data['category'] = Category.objects.get(name=trxn[6])
-            if trxn[7] != "":
-                entry_data['subcategory'] = Subcategory.objects.get(name=trxn[7])
 
         transaction_form = TransactionForm(entry_data)
         save_form(transaction_form, user)

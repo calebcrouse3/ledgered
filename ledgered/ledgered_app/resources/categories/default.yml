@@ -1,77 +1,22 @@
 # the default categories that are given to every new account
-amusement & recreation:
-- ''
-debt payments:
-- ''
-eating & drinking out:
-- ''
-- bars
+categories:
+- amusement & recreation
+- debt payments
+- bars & restaurants
 - coffee shops
-- delivery
-- restaurants
-grocery store:
-- ''
-housing:
-- ''
-- rent
-ignore:
-- ''
-income:
-- ''
-- salary
-insurance:
-- ''
-lodging:
-- ''
-- airbnb
-- hotel
-medical:
-- ''
-- doctor
-- pharmacy
-- phsical therapy
-- therapy
-misc:
-- ''
-savings & invesment:
-- ''
-services:
-- ''
-- haircut
-- relaxation
-shopping:
-- ''
-- books & education
-- clothing
-- electronics
-- gifts
-- health and wellness
-- home items
-- music gear
-- sporting
-- tools and hardware
-subscriptions & memberships:
-- ''
-- apps & software
-- gym
-- products
-- streaming
-taxes:
-- ''
-transportation:
-- ''
-- auto parts & maintenance
-- dmv
-- gas
-- parking
-- public
-- tickets
-- uber
-travel:
-- ''
-- airplane
-utilities:
-- ''
-- home
-- internet
-- phone
+- delivery food
+- grocery & corner store
+- rent and utilities
+- ignore
+- income
+- insurance
+- lodging
+- medical
+- misc
+- savings & invesment
+- services
+- shopping
+- subscriptions & memberships
+- taxes
+- transportation
+- travel
