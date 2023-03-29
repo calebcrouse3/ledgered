@@ -48,18 +48,6 @@ class Category(models.Model):
         return f"{self.name}"
 
 
-class Subcategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    name = models.CharField(max_length=200)
-    date_added = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = "subcategories"
-
-    def __str__(self):
-        return f"{self.name}"
-
-
 class Transaction(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField()
@@ -76,7 +64,6 @@ class Transaction(models.Model):
     pretty_description = models.CharField(max_length=200, null=True, default=None, blank=True)
     # need to give users some way to fill in or re ledger transactions with deleted categories
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, default=None, blank=True)
-    subcategory = models.ForeignKey(Subcategory, on_delete=models.SET_NULL, null=True, default=None, blank=True)
 
     def __str__(self):
         return f"""
@@ -86,14 +73,13 @@ class Transaction(models.Model):
             {self.amount}
             {self.original_description}
             {self.pretty_description}
-            {self.category}
-            {self.subcategory}"""
+            {self.category}"""
 
 
 class Description(models.Model):
     """A description rule. Provides a pretty description for
     a transactions and is used to guess the correct category
-    and sub_category for a transaction
+    for a transaction
     """
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=200)

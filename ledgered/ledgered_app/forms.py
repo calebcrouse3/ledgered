@@ -53,12 +53,6 @@ class CategoryForm(forms.ModelForm):
         exclude = ('owner',)
 
 
-class SubcategoryForm(forms.ModelForm):
-    class Meta:
-        model = Subcategory
-        fields = '__all__'
-
-
 class DescriptionForm(forms.ModelForm):
     class Meta:
         model = Description

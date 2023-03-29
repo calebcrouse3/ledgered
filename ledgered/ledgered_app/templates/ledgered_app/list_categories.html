@@ -1,20 +1,33 @@
 {% extends "ledgered_app/base.html" %}
 
+
+
 {% block content %}
-
-<h1>Categories</h1>
-
-<ul>
-    {% for cat, subcats in cats_subcats.items %}
-    <li>{{ cat }}</li>
-    <ul>
-        {% for subcat in subcats %}
-        <li>{{ subcat }}</li>
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simple_table.css' %}">
+</head>
+<body>
+    <h1>Categories</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in object_list %}
+        <tr>
+          <td>{{ d.name }}</td>
+        </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7">No Accounts</td>
+          </tr>
         {% endfor %}
-    </ul>
-    {% empty %}
-    <li>No categories have been added yet.</li>
-    {% endfor %}
-</ul>
-
+      </tbody>
+    </table>
+</body>
+</html>
 {% endblock content %}

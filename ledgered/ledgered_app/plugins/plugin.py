@@ -155,8 +155,7 @@ class Plugin:
             "account": Account.objects.get(name=self.ACCOUNT_NAME),
             "original_description": row["original_description"],
             "pretty_description": None,
-            "category": None,
-            "subcategory": None,
+            "category": None
         }
 
         form = TransactionForm(form_data)
