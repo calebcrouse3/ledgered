@@ -3,7 +3,9 @@
 import configparser
 import os
 
-PWD = os.getcwd()
+# sometimes this returns a different folder each time so just hard code for now
+# PWD = os.getcwd() 
+PWD = "/Users/calebcrouse/repos/ledgered/"
 
 config = configparser.ConfigParser()
 config.read(PWD + '/ledgered/ledgered_app/configs/config.ini')
