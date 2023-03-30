@@ -5,13 +5,16 @@ from .utils.handle_upload import handle_upload
 from .forms import FileUploadForm, TransactionForm, SeedRequestForm, DescriptionForm, LedgerTransactionForm
 from .models import *
 from .utils.form_utils import save_form
-from .configs.config import RESOURCE_PATH
+from .configs.config import *
 from django.views.generic import ListView
 from django.contrib.auth.decorators import login_required
-from bokeh.plotting import figure
-from bokeh.embed import components
+#from bokeh.plotting import figure
+#from bokeh.embed import components
 import os
+import logging.config
 
+logging.config.fileConfig(LOGGER_CONFIG_PATH)
+logger = logging.getLogger('root')
 
 def index(request):
     return render(request, 'ledgered_app/index.html')
@@ -162,11 +165,11 @@ def upload(request):
 
         return render(request, 'ledgered_app/upload.html', context)
 
-
+ 
 @login_required
 def reports(request):
-    """This is just a toy function. Replace with real plot later"""
-
+    pass
+"""
     # Create a Bokeh figure
     p = figure()
     p.circle([1, 2, 3, 4, 5], [2, 5, 8, 2, 7])
@@ -176,7 +179,7 @@ def reports(request):
 
     # Render the template with the Bokeh visualization embedded
     return render(request, 'ledgered_app/reports.html', context={'script': script, 'div': div})
-
+ """
 
 @login_required
 def delete_all(request):
@@ -187,6 +190,7 @@ def delete_all(request):
     return render(request, 'ledgered_app/delete_all.html')
 
 
+@login_required
 def export(request):
     columns = [
         "date",
@@ -198,6 +202,7 @@ def export(request):
         "category"
     ]
     transactions = Transaction.objects.all()
+    logger.info(f"Number of transactions fetched for export {transactions.count()}")
     data = download_csv(request, transactions, columns)
     response = HttpResponse(data, content_type='text/csv')
     return response

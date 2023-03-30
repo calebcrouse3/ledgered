@@ -1,6 +1,7 @@
 ### Where you left off
 
 ### TODO List
+- Maybe make credit transactions automatically ignore
 - Nail down transaction processing logic. Make a runbook for ledgering!
   - Aggregation
   - Duplication

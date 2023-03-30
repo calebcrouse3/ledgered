@@ -3,6 +3,12 @@ import csv
 
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
+from ..configs.config import *
+
+import logging.config
+
+logging.config.fileConfig(LOGGER_CONFIG_PATH)
+logger = logging.getLogger('root')
 
 
 def load_yaml(file_path):
@@ -20,8 +26,9 @@ def load_csv(file_path):
 
 
 def download_csv(request, queryset, columns):
-    if not request.user.is_staff:
-        raise PermissionDenied
+    # if not request.user.is_staff:
+    #     logger.warn("You aint no admin! Cant download this file")
+    #     raise PermissionDenied
 
     model = queryset.model
     model_fields = model._meta.fields + model._meta.many_to_many
