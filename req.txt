@@ -2,3 +2,4 @@ django
 django-bootstrap5
 pandas
 pyyaml
+django-plotly-dash

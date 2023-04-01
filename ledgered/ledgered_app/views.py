@@ -8,10 +8,10 @@ from .utils.form_utils import save_form
 from .configs.config import *
 from django.views.generic import ListView
 from django.contrib.auth.decorators import login_required
-#from bokeh.plotting import figure
-#from bokeh.embed import components
+import pandas as pd
 import os
 import logging.config
+from .dashboards.plastic_scrap import get_app
 
 logging.config.fileConfig(LOGGER_CONFIG_PATH)
 logger = logging.getLogger('root')
@@ -168,18 +168,17 @@ def upload(request):
  
 @login_required
 def reports(request):
-    pass
-"""
-    # Create a Bokeh figure
-    p = figure()
-    p.circle([1, 2, 3, 4, 5], [2, 5, 8, 2, 7])
+    #transactions = get_user_transactions(request.user)
+    get_app("this is my title")
+    return render(request, 'ledgered_app/reports.html')
 
-    # Generate the HTML and JavaScript code for the Bokeh visualization
-    script, div = components(p)
 
-    # Render the template with the Bokeh visualization embedded
-    return render(request, 'ledgered_app/reports.html', context={'script': script, 'div': div})
- """
+def get_user_transactions(user):
+    user_data = []
+    for t in Transaction.objects.select_related("category", "account") .filter(owner=user):
+        user_data.append([t.date, t.type, t.account, t.amount, t.original_description, t.pretty_description, t.category])
+    return pd.DataFrame(user_data, columns = ["date", "type", "account", "amount", "original_description", "pretty_description", "category"])
+
 
 @login_required
 def delete_all(request):
@@ -237,12 +236,3 @@ class CategoriesListView(ListView):
 
 class AccountListView(ListView):
     model = Account
-
-
-""" @login_required
-def list_categories(request):
-    # Print all categories in data base
-    categories = Category.objects.filter(owner=request.user).order_by('name')
-    context = {'categories': categories}
-    return render(request, 'ledgered_app/list_categories.html', context)
- """

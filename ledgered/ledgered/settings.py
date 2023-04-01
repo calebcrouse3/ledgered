@@ -37,6 +37,7 @@ INSTALLED_APPS = [
 
     # third part apps
     'django_bootstrap5',
+    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
 
     # default apps
     'django.contrib.admin',
@@ -55,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_plotly_dash.middleware.BaseMiddleware'
 ]
 
 ROOT_URLCONF = 'ledgered.urls'
@@ -165,3 +167,4 @@ LOGGING = {
 LOGIN_REDIRECT_URL = 'ledgered_app:index'
 LOGOUT_REDIRECT_URL = 'ledgered_app:index'
 LOGIN_URL = 'accounts:login'
+X_FRAME_OPTIONS = 'SAMEORIGIN'
