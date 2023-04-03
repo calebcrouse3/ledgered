@@ -32,10 +32,10 @@ app.layout = html.Div([
     html.Div(children='Transactions By Category', style={'font-weight': 'bold', 'font-size': '24px'}),
     html.Div([
         dcc.Graph(figure=pie_chart_figure, style={'width': '65%'}, id="chart"),
-        dash_table.DataTable(data=[], page_size=20, page_action='native', style_table={'width': '35%'}, id="table")
+        # TODO not using callbacks and callbacks not working
+        dash_table.DataTable(data=select_category(df['category'].values[0]), page_size=20, page_action='native', style_table={'width': '35%'}, id="table")
     ], style={'display': 'flex'})
 ])
-
 
 @callback(
     Output(component_id='table', component_property='data'),
