@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 import pandas as pd
 import os
 import logging.config
-from .dashboards.plastic_scrap import get_app
+from .dashboards.transactions import *
 
 logging.config.fileConfig(LOGGER_CONFIG_PATH)
 logger = logging.getLogger('root')
@@ -169,7 +169,6 @@ def upload(request):
 @login_required
 def reports(request):
     #transactions = get_user_transactions(request.user)
-    get_app("this is my title")
     return render(request, 'ledgered_app/reports.html')
 
 

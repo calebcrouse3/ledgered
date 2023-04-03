@@ -2,14 +2,14 @@ from dash import dcc, html, dash_table, callback, Input, Output, Dash
 import pandas as pd
 import plotly.express as px
 import os
+from django_plotly_dash import DjangoDash
 
-df = pd.read_csv("../../ledgered/ledgered_app/resources/transactions/chase_categorized.csv")
+df = pd.read_csv(os.getcwd() + "/ledgered_app/resources/transactions/chase_categorized.csv")
 df.columns = ["date", "type", "amount", "account", "original_description", "pretty_description", "category"]
 df.drop(df.loc[df["category"] == "Ignore"].index, inplace=True)
 df["description"] = df['pretty_description'].fillna(df['original_description'])
 
-app = Dash(__name__)
-
+app = DjangoDash("Transactions")
 
 def select_category(category):
     group_desc = df[df["category"] == category].groupby("description", as_index=False).agg(
@@ -48,7 +48,3 @@ def update_table(click_data):
         category = df['category'].values[0]
     outputDf = select_category(category)
     return outputDf
-
-
-if __name__ == '__main__':
-    app.run_server(debug=True)
