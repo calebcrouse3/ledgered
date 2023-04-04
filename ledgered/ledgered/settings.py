@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'accounts',
 
     # third part apps
+    'daphne',
     'django_bootstrap5',
     'django_plotly_dash.apps.DjangoPlotlyDashConfig',
 
@@ -168,3 +169,4 @@ LOGIN_REDIRECT_URL = 'ledgered_app:index'
 LOGOUT_REDIRECT_URL = 'ledgered_app:index'
 LOGIN_URL = 'accounts:login'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+ASGI_APPLICATION = "ledgered.asgi.application"

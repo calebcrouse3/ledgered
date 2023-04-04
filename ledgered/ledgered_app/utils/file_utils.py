@@ -7,6 +7,8 @@ from ..configs.config import *
 
 import logging.config
 
+print("HERE", LOGGER_CONFIG_PATH)
+
 logging.config.fileConfig(LOGGER_CONFIG_PATH)
 logger = logging.getLogger('root')
 
