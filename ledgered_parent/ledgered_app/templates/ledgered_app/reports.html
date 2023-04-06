@@ -1,9 +1,7 @@
 {% extends "ledgered_app/base.html" %}
 
 {% block content %}
-
-{%load plotly_dash%}
-
-{% plotly_app name="Transactions" ratio=0.5%}
-
+<body>
+    {{ plot_div|safe }}
+</body>
 {% endblock content %}

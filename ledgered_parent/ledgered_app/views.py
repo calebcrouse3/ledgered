@@ -11,7 +11,8 @@ from django.contrib.auth.decorators import login_required
 import pandas as pd
 import os
 import logging.config
-from .dashboards.transactions import *
+from .dashboards.test import get_plot
+
 
 logging.config.fileConfig(LOGGER_CONFIG_PATH)
 logger = logging.getLogger('root')
@@ -165,17 +166,18 @@ def upload(request):
 
         return render(request, 'ledgered_app/upload.html', context)
 
- 
+
 @login_required
 def reports(request):
-    #transactions = get_user_transactions(request.user)
-    return render(request, 'ledgered_app/reports.html')
+    transactions = get_user_transactions(request.user)
+    plot_div = get_plot(transactions)
+    return render(request, "ledgered_app/reports.html", context={'plot_div': plot_div})
 
 
 def get_user_transactions(user):
     user_data = []
     for t in Transaction.objects.select_related("category", "account") .filter(owner=user):
-        user_data.append([t.date, t.type, t.account, t.amount, t.original_description, t.pretty_description, t.category])
+        user_data.append([t.date, t.type, t.account.name, t.amount, t.original_description, t.pretty_description, t.category.name])
     return pd.DataFrame(user_data, columns = ["date", "type", "account", "amount", "original_description", "pretty_description", "category"])
 
 

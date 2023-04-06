@@ -1,4 +1,7 @@
 ### Where you left off
+- get a chart that show last full week compared to weekly average
+- get a week by week total expenses timeline  
+- get a report that show reoccuring purchases that might be subscriptions (come up with simple subscription algo)
 
 ### TODO List
 - Maybe make credit transactions automatically ignore
