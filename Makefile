@@ -1,12 +1,12 @@
 build:
-	@docker build -t ledgered-django-app ledgered
+	@docker build -t ledgered-django-app ledgered_parent
 
 start:
 	@docker run \
 		--detach \
 		-p 8000:8000 \
-		-v $(PWD)/ledgered/ledgered_app:/ledgered/ledgered_app \
-		-v $(PWD)/ledgered/db.sqlite3:/ledgered/db.sqlite3 \
+		-v $(PWD)/ledgered_parent/ledgered_app:/ledgered_parent/ledgered_app \
+		-v $(PWD)/ledgered_parent/db.sqlite3:/ledgered_parent/db.sqlite3 \
 		--name ledgered-django-app \
 		ledgered-django-app
 	@sleep 3

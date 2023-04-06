@@ -2,7 +2,7 @@
 import configparser
 
 config = configparser.ConfigParser()
-config.read('/ledgered/ledgered_app/configs/config.ini')
+config.read('/ledgered_parent/ledgered_app/configs/config.ini')
 
 # accessible config values
 RESOURCE_PATH = config.get('paths', 'resources')
