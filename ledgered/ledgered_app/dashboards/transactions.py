@@ -1,3 +1,5 @@
+TEST = "hi"
+"""
 from dash import dcc, html, dash_table, callback, Input, Output, Dash
 import pandas as pd
 import plotly.express as px
@@ -37,6 +39,7 @@ app.layout = html.Div([
     ], style={'display': 'flex'})
 ])
 
+
 @callback(
     Output(component_id='table', component_property='data'),
     Input(component_id='chart', component_property='clickData')
@@ -48,3 +51,4 @@ def update_table(click_data):
         category = df['category'].values[0]
     outputDf = select_category(category)
     return outputDf
+"""
